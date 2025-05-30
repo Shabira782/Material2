@@ -276,8 +276,36 @@
                     }
                 });
             });
-
         });
+
+        function updateClusterOptions(tableSelector) {
+            // Jika tableSelector adalah elemen HTML, ambil ID-nya
+            if (tableSelector instanceof HTMLElement) {
+                tableSelector = `#${tableSelector.id}`;
+            }
+
+            const selected = new Set();
+
+            // Kumpulkan semua nilai yang sudah dipilih dalam tabel tertentu
+            $(`${tableSelector} .nama_cluster`).each(function() {
+                const value = $(this).val();
+                if (value) selected.add(value);
+            });
+
+            // Perbarui dropdown untuk semua cluster dalam tabel tertentu
+            $(`${tableSelector} .nama_cluster`).each(function() {
+                const $select = $(this);
+                const currentValue = $select.val();
+
+                $select.find('option').each(function() {
+                    const optionValue = this.value;
+                    $(this).prop('disabled', optionValue && selected.has(optionValue) && optionValue !== currentValue);
+                });
+
+                // Refresh UI Select2
+                $select.trigger('change.select2');
+            });
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const navTab = document.getElementById("nav-tab");
@@ -285,56 +313,11 @@
             let tabIndex = 2;
             // let valueLot = "";
 
-            // Inisialisasi semua tabel dengan ID yang diawali "poTable"
-            document.querySelectorAll('table[id^="poTable"]').forEach(poTable => {
-                initializeClusterDropdowns(poTable);
+            // Listener untuk dropdown nama_cluster pada semua tabel dengan ID diawali "poTable"
+            $(document).on('change', 'table[id^="poTable"] .nama_cluster', function() {
+                const tableSelector = `#${$(this).closest('table').attr('id')}`;
+                updateClusterOptions(tableSelector);
             });
-
-            // Fungsi untuk inisialisasi Select2 pada dropdown cluster
-            function initializeClusterDropdowns(poTable) {
-                // Inisialisasi Select2
-                $(poTable).find('.nama_cluster').select2();
-
-                // Event listener untuk Select2 saat nilai dropdown berubah
-                $(poTable).find('.nama_cluster').on('select2:select', function() {
-                    updateClusterOptions(); // Perbarui semua dropdown di semua tabel
-                });
-            }
-
-            // Fungsi untuk memperbarui opsi dropdown di semua tabel
-            function updateClusterOptions() {
-                const selectedValues = new Set();
-
-                // Kumpulkan semua nilai yang telah dipilih di semua tabel
-                document.querySelectorAll('table[id^="poTable"] .nama_cluster').forEach(select => {
-                    const value = $(select).val();
-                    if (value) {
-                        selectedValues.add(value); // Masukkan ke dalam set
-                    }
-                });
-
-                // Iterasi melalui semua dropdown untuk memperbarui opsi
-                document.querySelectorAll('table[id^="poTable"] .nama_cluster').forEach(select => {
-                    const currentValue = $(select).val();
-
-                    // Perbarui opsi dropdown
-                    $(select).find('option').each(function() {
-                        const optionValue = $(this).val();
-
-                        if (optionValue && selectedValues.has(optionValue) && optionValue !== currentValue) {
-                            $(this).prop('disabled', true); // Disable opsi jika sudah dipilih
-                            console.log(querySelectorAll);
-                        } else {
-                            $(this).prop('disabled', false); // Enable opsi jika tidak dipilih
-                            console.log(optionValue);
-                        }
-                    });
-
-                    // Reinitialize Select2 untuk memperbarui UI
-                    $(select).select2('destroy').select2();
-                });
-            }
-
 
             function updateTabNumbers() {
                 // Update nomor pada setiap tab
@@ -362,13 +345,13 @@
                 tabIndex = tabButtons.length + 1;
             }
 
-            function updateRowNumbers(table) {
-                const rows = table.querySelectorAll("tbody tr");
-                rows.forEach((row, index) => {
-                    console.log(index);
-                    row.querySelector("input[name^='nama_cluster']").value = index + 1;
-                });
-            }
+            // function updateRowNumbers(table) {
+            //     const rows = table.querySelectorAll("tbody tr");
+            //     rows.forEach((row, index) => {
+            //         console.log(index);
+            //         row.querySelector("input[name^='nama_cluster']").value = index + 1;
+            //     });
+            // }
 
             // Event delegation untuk menghapus baris
             document.addEventListener("click", function(event) {
@@ -377,7 +360,9 @@
                     const table = row.closest("table");
                     row.remove();
                     calculateTotals(table);
-                    updateRowNumbers(table);
+                    updateClusterOptions(table);
+                    // updateRowNumbers(table);
+
                 }
             });
 
@@ -578,7 +563,7 @@
                             </div>
                         </div>
                     </div>
-            `;
+                `;
 
                 navTabContent.appendChild(newTabPane);
                 document.getElementById(newContentId).querySelectorAll('.slc2').forEach(el => {
@@ -666,30 +651,29 @@
                         width: '100%'
                     });
 
+                    // calculateTotals(newPoTable);
+                    calculateTotals(newTabPane.querySelector(`#${newPoTableId}`));
                     // cek duplikat cluster
-                    initializeClusterDropdowns(newPoTable);
+                    updateClusterOptions(newPoTable);
 
                     // Tambahkan event listener untuk tombol hapus (removeRow) pada baris baru
                     newRow.querySelector(".removeRow").addEventListener("click", function() {
                         newRow.remove();
                         calculateTotals(newPoTable); // Perbarui total setelah baris dihapus
                         // cek duplikat cluster
-                        initializeClusterDropdowns(newPoTable);
-                        s
-                        updateRowNumbers(newPoTable);
+                        updateClusterOptions(newPoTable);
+                        // updateRowNumbers(newPoTable);
                     });
                     // Recalculate totals when new row is added
                     newRow.querySelectorAll('input').forEach(input => {
                         input.addEventListener('input', function() {
                             // cek duplikat cluster
-                            initializeClusterDropdowns(newPoTable);
+                            updateClusterOptions(newPoTable);
                             calculateTotals(newPoTable);
                         });
                     });
-                    // calculateTotals(newPoTable);
-                    calculateTotals(newTabPane.querySelector(`#${newPoTableId}`));
-                    // cek duplikat cluster
-                    initializeClusterDropdowns(newTabPane.querySelector(`#${newPoTableId}`));
+
+
                 });
 
                 // Event listeners for input changes
@@ -697,13 +681,14 @@
                     input.addEventListener('input', function() {
                         calculateTotals(newPoTable);
                         // cek duplikat cluster
-                        initializeClusterDropdowns(newPoTable);
+                        updateClusterOptions(newPoTable);
                     });
                 });
                 tabIndex++;
                 calculateTotals(newPoTable);
                 // cek duplikat cluster
-                initializeClusterDropdowns(newPoTable);
+                updateClusterOptions(newPoTable);
+
             }
 
             $(document).on('select2:select', '.nama_cluster', function(event) {
@@ -825,11 +810,11 @@
                     width: '100%'
                 });
 
-                initializeClusterDropdowns(poTable);
                 // cek duplikat cluster
+                updateClusterOptions(poTable);
 
                 // Update nomor baris
-                updateRowNumbers(poTable);
+                // updateRowNumbers(poTable);
 
                 // Tambahkan event listener ke input baru
                 newRow.querySelectorAll('input').forEach(input => {
@@ -844,16 +829,16 @@
             calculateTotals(poTable);
         });
 
-        function updateRowNumbers(poTable) {
-            const rows = poTable.querySelectorAll('tbody tr');
-            console.log(poTable);
-            rows.forEach((row, index) => {
-                const clusterSelect = row.querySelector('input[name^="nama_cluster"]');
-                if (clusterSelect) {
-                    clusterSelect.value = index + 1;
-                }
-            });
-        }
+        // function updateRowNumbers(poTable) {
+        //     const rows = poTable.querySelectorAll('tbody tr');
+        //     console.log(poTable);
+        //     rows.forEach((row, index) => {
+        //         const clusterSelect = row.querySelector('input[name^="nama_cluster"]');
+        //         if (clusterSelect) {
+        //             clusterSelect.value = index + 1;
+        //         }
+        //     });
+        // }
 
         function calculateTotals(poTable) {
             let totalKgs = 0;

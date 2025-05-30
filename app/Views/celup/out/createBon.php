@@ -300,6 +300,7 @@
             function updateRowNumbers(table) {
                 const rows = table.querySelectorAll("tbody tr");
                 rows.forEach((row, index) => {
+                    console.log(rows);
                     row.querySelector("input[name^='no_karung']").value = index + 1;
                 });
             }
