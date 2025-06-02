@@ -163,11 +163,11 @@
                                                     <table id="poTable" class="table table-bordered table-striped">
                                                         <thead>
                                                             <tr>
-                                                                <th width=300 class="text-center">Nama Cluster</th>
-                                                                <th width=150 class="text-center">Kapasitas</th>
                                                                 <th width=200 class="text-center">NW</th>
                                                                 <th width=200 class="text-center">Cones</th>
                                                                 <th width=200 class="text-center">Karung</th>
+                                                                <th width=300 class="text-center">Nama Cluster</th>
+                                                                <th width=150 class="text-center">Kapasitas</th>
                                                                 <th class="text-center">
                                                                     <button type="button" class="btn btn-info" id="addRow">
                                                                         <i class="fas fa-plus"></i>
@@ -177,16 +177,13 @@
                                                         </thead>
                                                         <tbody>
                                                             <tr>
-                                                                <td><select class="form-select text-center nama_cluster" name="nama_cluster[0][0]">
-                                                                        <option value="">Pilih Cluster</option>
-                                                                        <?php foreach ($cluster as $c) { ?>
-                                                                            <option value="<?= $c['nama_cluster'] ?>"><?= $c['nama_cluster'] ?></option>
-                                                                        <?php } ?>
-                                                                    </select></td>
-                                                                <td><input type="float" class="form-control kapasitas" name="kapasitas[0][0]" readonly></td>
                                                                 <td><input type="float" class="form-control kgs_input" name="kgs[0][0]" required></td>
                                                                 <td><input type="float" class="form-control cones_input" name="cones[0][0]" required></td>
                                                                 <td><input type="float" class="form-control karung_input" name="karung[0][0]" required></td>
+                                                                <td><select class="form-select text-center nama_cluster" name="nama_cluster[0][0]">
+                                                                        <option value="">Pilih Cluster</option>
+                                                                    </select></td>
+                                                                <td><input type="float" class="form-control kapasitas" name="kapasitas[0][0]" readonly></td>
                                                                 <td class="text-center">
                                                                     <!-- <button type="button" class="btn btn-danger removeRow">
                                                                         <i class="fas fa-trash"></i>
@@ -197,18 +194,16 @@
                                                         <!-- Baris Total -->
                                                         <tfoot>
                                                             <tr>
-                                                                <th class="text-center" colspan="2"></th>
                                                                 <th class="text-center">Total NW</th>
                                                                 <th class="text-center">Total Cones</th>
                                                                 <th class="text-center">Total Karung</th>
-                                                                <th></th>
+                                                                <th class="text-center" colspan="3"></th>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="2"></td>
                                                                 <td><input type="float" class="form-control" id="total_kgs" name="total_kgs" placeholder="NW" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_cones" name="total_cones" placeholder="Cones" readonly></td>
                                                                 <td><input type="float" class="form-control" id="total_karung" name="total_karung" placeholder="Karung" readonly></td>
-                                                                <td></td>
+                                                                <td colspan="3"></td>
                                                             </tr>
                                                         </tfoot>
                                                     </table>
@@ -244,7 +239,7 @@
 
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script>
@@ -266,7 +261,7 @@
                     }, // Kirim dalam format object
                     dataType: "json",
                     success: function(data) {
-                        console.log(data);
+                        // console.log(data);
                         $('#no_model').val(data.no_model);
                         $('#item_type').val(data.item_type);
                         $('#kode_warna').val(data.kode_warna);
@@ -299,11 +294,12 @@
 
                 $select.find('option').each(function() {
                     const optionValue = this.value;
-                    $(this).prop('disabled', optionValue && selected.has(optionValue) && optionValue !== currentValue);
+                    const isDisabled = optionValue && selected.has(optionValue) && optionValue !== currentValue;
+                    $(this).prop('disabled', isDisabled);
                 });
 
                 // Refresh UI Select2
-                $select.trigger('change.select2');
+                $select.trigger('change');
             });
         }
 
@@ -311,13 +307,6 @@
             const navTab = document.getElementById("nav-tab");
             const navTabContent = document.getElementById("nav-tabContent");
             let tabIndex = 2;
-            // let valueLot = "";
-
-            // Listener untuk dropdown nama_cluster pada semua tabel dengan ID diawali "poTable"
-            $(document).on('change', 'table[id^="poTable"] .nama_cluster', function() {
-                const tableSelector = `#${$(this).closest('table').attr('id')}`;
-                updateClusterOptions(tableSelector);
-            });
 
             function updateTabNumbers() {
                 // Update nomor pada setiap tab
@@ -344,14 +333,6 @@
                 // Perbarui indeks tab berikutnya
                 tabIndex = tabButtons.length + 1;
             }
-
-            // function updateRowNumbers(table) {
-            //     const rows = table.querySelectorAll("tbody tr");
-            //     rows.forEach((row, index) => {
-            //         console.log(index);
-            //         row.querySelector("input[name^='nama_cluster']").value = index + 1;
-            //     });
-            // }
 
             // Event delegation untuk menghapus baris
             document.addEventListener("click", function(event) {
@@ -500,11 +481,11 @@
                                 <table id="${newPoTableId}" class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th width=300 class="text-center">Nama Cluster</th>
-                                            <th width=150 class="text-center">Kapasitas</th>
-                                            <th width=200 class="text-center">NW</th>
-                                            <th width=200 class="text-center">Cones</th>
-                                            <th width=200 class="text-center">Karung</th>
+                                        <th width=200 class="text-center">NW</th>
+                                        <th width=200 class="text-center">Cones</th>
+                                        <th width=200 class="text-center">Karung</th>
+                                        <th width=300 class="text-center">Nama Cluster</th>
+                                        <th width=150 class="text-center">Kapasitas</th>
                                             <th class="text-center">
                                                 <button type="button" class="btn btn-info" id="addRow">
                                                     <i class="fas fa-plus"></i>
@@ -514,16 +495,13 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td><select class="form-select text-center nama_cluster" name="nama_cluster[0][0]">
-                                                    <option value="">Pilih Cluster</option>
-                                                    <?php foreach ($cluster as $c) { ?>
-                                                        <option value="<?= $c['nama_cluster'] ?>"><?= $c['nama_cluster'] ?></option>
-                                                    <?php } ?>
-                                                </select></td>
-                                            <td><input type="float" class="form-control kapasitas" name="kapasitas[0][0]" required></td>
-                                            <td><input type="float" class="form-control kgs_input" name="kgs[0][0]" required></td>
-                                            <td><input type="float" class="form-control cones_input" name="cones[0][0]" required></td>
-                                            <td><input type="float" class="form-control karung_input" name="karung[0][0]" required></td>
+                                        <td><input type="float" class="form-control kgs_input" name="kgs[0][0]" required></td>
+                                        <td><input type="float" class="form-control cones_input" name="cones[0][0]" required></td>
+                                        <td><input type="float" class="form-control karung_input" name="karung[0][0]" required></td>
+                                        <td><select class="form-select text-center nama_cluster" name="nama_cluster[0][0]">
+                                                <option value="">Pilih Cluster</option>
+                                            </select></td>
+                                        <td><input type="float" class="form-control kapasitas" name="kapasitas[0][0]" required></td>
                                             <td class="text-center">
                                                 <!-- <button type="button" class="btn btn-danger removeRow">
                                                     <i class="fas fa-trash"></i>
@@ -534,18 +512,16 @@
                                     <!-- Baris Total -->
                                     <tfoot>
                                         <tr>
-                                            <th class="text-center" colspan="2"></th>
                                             <th class="text-center">Total NW</th>
                                             <th class="text-center">Total Cones</th>
                                             <th class="text-center">Total Karung</th>
-                                            <th></th>
+                                            <th class="text-center" colspan="3"></th>
                                         </tr>
                                         <tr>
-                                            <td colspan="2"></td>
                                             <td><input type="float" class="form-control" id="total_kgs" name="total_kgs" placeholder="NW" readonly></td>
                                             <td><input type="float" class="form-control" id="total_cones" name="total_cones" placeholder="Cones" readonly></td>
                                             <td><input type="float" class="form-control" id="total_karung" name="total_karung" placeholder="Cones" readonly></td>
-                                            <td></td>
+                                            <td colspan="3"></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -586,8 +562,8 @@
                             }, // Kirim dalam format object
                             dataType: "json",
                             success: function(data) {
-                                console.log(data);
-                                console.log("ID Celup:", idcelup);
+                                // console.log(data);
+                                // console.log("ID Celup:", idcelup);
                                 // Update elemen input dan select di dalam tab baru
                                 document.getElementById(id_celup).value = idcelup;
                                 document.getElementById(newInputId).value = data.no_model;
@@ -623,22 +599,19 @@
                 const removeRowButton = newTabPane.querySelector("#removeRow");
                 const newPoTable = newTabPane.querySelector(`#${newPoTableId}`);
                 const makan = tabIndex - 1;
-                console.log(makan);
+                // console.log(makan);
                 addRowButton.addEventListener("click", function() {
                     const rowCount = newPoTable.querySelectorAll("tbody tr").length + 1;
                     const newRow = document.createElement("tr");
 
                     newRow.innerHTML = `
-                        <td width=300><select class="form-select text-center nama_cluster" name="nama_cluster[${tabIndex-2}][${rowCount-1}]">
-                                <option value="">Pilih Cluster</option>
-                                <?php foreach ($cluster as $c) { ?>
-                                    <option value="<?= $c['nama_cluster'] ?>"><?= $c['nama_cluster'] ?></option>
-                                <?php } ?>
-                            </select></td>
-                        <td><input type="float" class="form-control kapasitas" name="kapasitas[${tabIndex-2}][${rowCount-1}]" required readonly></td>
                         <td><input type="float" class="form-control kgs_input" name="kgs[${tabIndex-2}][${rowCount-1}]" required></td>
                         <td><input type="float" class="form-control cones_input" name="cones[${tabIndex-2}][${rowCount-1}]" required></td>
                         <td><input type="float" class="form-control karung_input" name="karung[${tabIndex-2}][${rowCount-1}]" required></td>
+                        <td width=300><select class="form-select text-center nama_cluster" name="nama_cluster[${tabIndex-2}][${rowCount-1}]">
+                                <option value="">Pilih Cluster</option>
+                            </select></td>
+                        <td><input type="float" class="form-control kapasitas" name="kapasitas[${tabIndex-2}][${rowCount-1}]" required readonly></td>
                         <td class="text-center">
                         <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
                         </td>
@@ -691,15 +664,61 @@
 
             }
 
+            // get cluster
+            $(document).on('change', '.kgs_input', function(event) {
+                const kgInputValue = $(this).val(); // Ambil nilai dari input kgs_input
+                const clusterSelect = $(this).closest("tr").find(".nama_cluster"); // Select2 target
+                const kapasitas = $(this).closest("tr").find(".kapasitas"); // Select2 target
+                const BASE_URL = '<?= base_url($role) ?>';
+
+                if (kgInputValue) {
+                    // Kirim permintaan ke server untuk mendapatkan data cluster
+                    $.ajax({
+                        url: `${BASE_URL}/getcluster`, // Endpoint untuk mendapatkan cluster
+                        type: 'POST',
+                        data: {
+                            kgs: kgInputValue
+                        },
+                        success: function(response) {
+                            updateClusterOptions()
+                            // Kosongkan opsi sebelumnya
+                            clusterSelect.empty($(this).closest("tr"));
+
+                            // Tambahkan opsi default
+                            clusterSelect.append(new Option("Pilih Cluster", "", true, true));
+
+                            // Iterasi melalui array respons dan tambahkan opsi
+                            response.forEach(item => {
+                                clusterSelect.append(new Option(`${item.nama_cluster}`, item.nama_cluster, false, false));
+                            });
+
+                            // Refresh Select2
+                            clusterSelect.trigger('change');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Gagal mengambil data cluster:", error);
+                        }
+                    });
+                } else {
+                    // Reset opsi jika input kosong
+                    clusterSelect.empty().append(new Option("Pilih Cluster", "", true, true)).trigger('change');
+                    kapasitas.empty();
+
+                }
+            });
+
             $(document).on('select2:select', '.nama_cluster', function(event) {
                 const clusterValue = $(this).val();
                 const kapasitasInput = $(this).closest("tr").find(".kapasitas");
                 const BASE_URL = '<?= base_url($role) ?>';
 
+                console.log(clusterValue);
+
                 if (clusterValue) {
                     fetch(`${BASE_URL}/sisaKapasitasByCLuster/${encodeURIComponent(clusterValue)}`)
                         .then(response => response.json())
                         .then(data => {
+                            console.log(data);
                             if (data && data.kapasitas) {
                                 kapasitasInput.val(parseFloat(data.kapasitas).toFixed(2));
                             } else {
@@ -769,7 +788,7 @@
                         }, // Kirim dalam format object
                         dataType: "json",
                         success: function(data) {
-                            console.log(data);
+                            // console.log(data);
                             $('#no_model').val(data.no_model);
                             $('#item_type').val(data.item_type);
                             $('#kode_warna').val(data.kode_warna);
@@ -789,20 +808,17 @@
                 const newRow = document.createElement('tr');
 
                 newRow.innerHTML = `
-                <td width=300><select class="form-select text-center nama_cluster" name="nama_cluster[0][${rowCount-1}]">
-                        <option value="">Pilih Cluster</option>
-                        <?php foreach ($cluster as $c) { ?>
-                            <option value="<?= $c['nama_cluster'] ?>"><?= $c['nama_cluster'] ?></option>
-                        <?php } ?>
-                    </select></td>
-                <td><input type="float" class="form-control kapasitas" name="kapasitas[0][${rowCount-1}]" required readonly></td>
-                <td><input type="float" class="form-control kgs_input" name="kgs[0][${rowCount-1}]" required></td>
-                <td><input type="float" class="form-control cones_input" name="cones[0][${rowCount-1}]" required></td>
-                <td><input type="float" class="form-control karung_input" name="karung[0][${rowCount-1}]" required></td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
-                </td>
-            `;
+                    <td><input type="float" class="form-control kgs_input" name="kgs[0][${rowCount-1}]" required></td>
+                    <td><input type="float" class="form-control cones_input" name="cones[0][${rowCount-1}]" required></td>
+                    <td><input type="float" class="form-control karung_input" name="karung[0][${rowCount-1}]" required></td>
+                    <td width=300><select class="form-select text-center nama_cluster" name="nama_cluster[0][${rowCount-1}]">
+                            <option value="">Pilih Cluster</option>
+                        </select></td>
+                    <td><input type="float" class="form-control kapasitas" name="kapasitas[0][${rowCount-1}]" required readonly></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
                 tbody.appendChild(newRow);
 
                 // Aktifkan Select2 pada elemen baru
@@ -828,17 +844,6 @@
             // Panggil pertama kali untuk inisialisasi
             calculateTotals(poTable);
         });
-
-        // function updateRowNumbers(poTable) {
-        //     const rows = poTable.querySelectorAll('tbody tr');
-        //     console.log(poTable);
-        //     rows.forEach((row, index) => {
-        //         const clusterSelect = row.querySelector('input[name^="nama_cluster"]');
-        //         if (clusterSelect) {
-        //             clusterSelect.value = index + 1;
-        //         }
-        //     });
-        // }
 
         function calculateTotals(poTable) {
             let totalKgs = 0;
@@ -869,18 +874,18 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // Untuk tab pertama
-            const firstPoTable = document.querySelector("#poTable-1");
-            if (firstPoTable) {
-                firstPoTable.querySelectorAll("input").forEach(input => {
-                    input.addEventListener("input", function() {
-                        calculateTotals(firstPoTable);
-                    });
-                });
-                calculateTotals(firstPoTable); // Hitung total awal
-            }
-        });
+        // document.addEventListener("DOMContentLoaded", function() {
+        //     // Untuk tab pertama
+        //     const firstPoTable = document.querySelector("#poTable-1");
+        //     if (firstPoTable) {
+        //         firstPoTable.querySelectorAll("input").forEach(input => {
+        //             input.addEventListener("input", function() {
+        //                 calculateTotals(firstPoTable);
+        //             });
+        //         });
+        //         calculateTotals(firstPoTable); // Hitung total awal
+        //     }
+        // });
 
         // addNewTab();
     </script>

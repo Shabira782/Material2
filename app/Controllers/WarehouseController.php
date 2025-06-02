@@ -2356,12 +2356,13 @@ class WarehouseController extends BaseController
             'title' => 'Material System',
             'role' => $this->role,
             'no_model' => $no_model,
-            'cluster' => $cluster,
+            'cluster' => $cluster
         ];
-        return view($this->role . "/warehouse/form-pemasukan2 copy", $data);
+        return view($this->role . "/warehouse/form-pemasukan2", $data);
     }
     public function sisaKapasitasByCLuster($cluster)
     {
+        // $kgInput = $this->request->getGet('kg');
         $data = $this->stockModel->getKapasitasByCluster($cluster);
 
         $kapasitas = $data->kapasitas - $data->Kgs - $data->KgsStockAwal;
@@ -2370,55 +2371,105 @@ class WarehouseController extends BaseController
             [
                 'success' => true,
                 'data' => $data,
-                'kapasitas' => $kapasitas
+                'kapasitas' => $kapasitas,
+                // 'kg' => $kgInput
             ]
         );
     }
     public function savePemasukan2()
     {
         $data = $this->request->getPost();
+        // dd($data);
 
-        $otherBon = $this->otherBonModel; // Sesuaikan dengan model kamu
-        $outCelup = $this->outCelupModel; // Sesuaikan dengan model kamu
-        $dataOtherBon = [
-            'no_model' => $data['no_model'],
-            'item_type' => $data['item_type'],
-            'kode_warna' => $data['kode_warna'],
-            'warna' => $data['warna'],
+        // $bonCelup = $this->bonCelupModel; // Sesuaikan dengan model kamu
+        // $outCelup = $this->outCelupModel; // Sesuaikan dengan model kamu
+        // $pemasukan = $this->outCelupModel; // Sesuaikan dengan model kamu
+        $dataBonCelup = [
             'tgl_datang' => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
             'detail_sj' => $data['detail_sj'],
-            'ganti_retur' => $data['ganti_retur'],
             'admin' => session()->get('username'),
             'created_at' => date('Y-m-d H:i:s'),
         ];
 
-        $saveBon = $otherBon->insert($dataOtherBon); // Melakukan insert
+        $saveBon = $this->bonCelupModel->insert($dataBonCelup); // Melakukan insert
         if ($saveBon) {
-            $id_other_in = $otherBon->insertID(); // Mengambil ID yang baru saja diinsert
+            $id_bon = $this->bonCelupModel->insertID(); // Mengambil ID yang baru saja diinsert
             $allSaved = true; // Flag untuk mengecek apakah semua data berhasil disimpan
 
-            $jumlahKrg = count($data['no_karung']);
+            $jumlahCluster = count($data['nama_cluster']);
 
-            for ($i = 0; $i < $jumlahKrg; $i++) {
-                $dataKrg = [
-                    'id_other_bon' => $id_other_in,
+            for ($i = 0; $i < $jumlahCluster; $i++) {
+                $dataOutCelup = [
+                    'id_bon' => $id_bon,
+                    'id_celup' => $data['id_celup'],
                     'no_model' => $data['no_model'],
                     'l_m_d' => $data['l_m_d'],
                     'harga' => $data['harga'],
-                    'no_karung' => $data['no_karung'][$i],
-                    'gw_kirim' => $data['gw'][$i],
+                    'gw_kirim' => $data['gw'],
                     'kgs_kirim' => $data['kgs'][$i],
                     'cones_kirim' => $data['cones'][$i],
+                    'karung_kirim' => $data['karung'][$i],
                     'lot_kirim' => $data['lot'],
                     'ganti_retur' => $data['ganti_retur'],
-                    'ganti_retur' => session()->get('username'),
+                    'admin' => session()->get('username'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
-                $saveKrg = $outCelup->insert($dataKrg); // Melakukan insert
-                if (!$saveKrg) {
-                    $allSaved = false; // Jika ada yang gagal, set flag ke false
-                    break; // Keluar dari loop jika ada kegagalan
+                $saveOutCelup = $this->outCelupModel->insert($dataOutCelup); // Melakukan insert
+                $idOutCelup = $this->outCelupModel->insertID(); // Mengambil ID yang baru saja diinsert
+
+                if ($saveOutCelup) {
+                    $dataIn = [
+                        'id_out_celup'  => $idOutCelup,
+                        'tgl_masuk'     => $data['tgl_datang'],
+                        'nama_cluster'  => $data['nama_cluster'][$i],
+                        'admin'         => session()->get('username'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $savePemasukan = $this->pemasukanModel->insert($dataIn); // Melakukan insert
+                    $id_pemasukan = $this->pemasukanModel->insertID(); // Mengambil ID yang baru saja diinsert
+
+                    if ($savePemasukan) {
+                        // Cek stok lama/bikin stok baru 
+                        $existingStock = $this->stockModel
+                            ->where('no_model', $data['no_model'])
+                            ->where('item_type', $data['item_type'])
+                            ->where('kode_warna', $data['kode_warna'])
+                            ->where('lot_stock', $data['lot'])
+                            ->where('nama_cluster', $data['nama_cluster'][$i])
+                            ->first();
+
+                        if ($existingStock) {
+                            $this->stockModel->update($existingStock['id_stock'], [
+                                'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs'][$i],
+                                'cns_in_out' => $existingStock['cns_in_out'] + $data['cones'],
+                                'krg_in_out' => $existingStock['krg_in_out'] + $data['karung']
+                            ]);
+                            $idStok = $existingStock['id_stock'];
+                        } else {
+                            $dataStock = [
+                                'no_model'      => $data['no_model'],
+                                'item_type'     => $data['item_type'],
+                                'kode_warna'    => $data['kode_warna'],
+                                'warna'         => $data['warna'],
+                                'kgs_in_out'    => $data['kgs'][$i],
+                                'cns_in_out'    => $data['cones'][$i],
+                                'krg_in_out'    => $data['karung'][$i],
+                                'lot_stock'     => $data['lot'],
+                                'nama_cluster'  => $data['nama_cluster'][$i],
+                            ];
+                            $saveStock = $this->stockModel->insert($dataStock);
+                            $idStok = $this->stockModel->getInsertID();
+                        }
+                        // update id stock in pemasukan
+                        $updateIdStock = $this->pemasukanModel->update($id_pemasukan, [
+                            'id_stock' => $idStok
+                        ]);
+                        if (!$updateIdStock) {
+                            $allSaved = false; // Jika ada yang gagal, set flag ke false
+                            break; // Keluar dari loop jika ada kegagalan
+                        }
+                    }
                 }
             }
             if ($allSaved) {
@@ -2430,7 +2481,7 @@ class WarehouseController extends BaseController
             session()->setFlashdata('error', "Gagal menyimpan data Bon");
         }
 
-        return redirect()->to(base_url($this->role . "/otherIn"));
-        dd($data);
+        return redirect()->to(base_url($this->role . "/pemasukan2"));
+        // dd($data);
     }
 }

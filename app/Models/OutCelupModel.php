@@ -27,6 +27,7 @@ class OutCelupModel extends Model
         'gw_kirim',
         'kgs_kirim',
         'cones_kirim',
+        'karung_kirim',
         'lot_kirim',
         'ganti_retur',
         'admin',
