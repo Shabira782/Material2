@@ -74,4 +74,39 @@ class BonCelupModel extends Model
         // ->join('schedule_celup', 'out_celup.id_bon=bon_celup.id_bon')
         //     ->();
     }
+    public function getDataPemasukan($idBon)
+    {
+        $builder = $this->select([
+            'schedule_celup.id_celup',
+            'bon_celup.id_bon',
+            'out_celup.id_out_celup',
+            'pemasukan.id_pemasukan',
+            'schedule_celup.no_model',
+            'schedule_celup.item_type',
+            'schedule_celup.kode_warna',
+            'schedule_celup.warna',
+            'bon_celup.tgl_datang',
+            'bon_celup.no_surat_jalan',
+            'bon_celup.detail_sj',
+            'bon_celup.admin',
+            'out_celup.l_m_d',
+            'out_celup.harga',
+            'out_celup.gw_kirim',
+            'out_celup.kgs_kirim',
+            'out_celup.cones_kirim',
+            'out_celup.karung_kirim',
+            'out_celup.lot_kirim',
+            'out_celup.ganti_retur',
+            'pemasukan.nama_cluster',
+            'pemasukan.out_jalur',
+            'pemasukan.id_stock'
+        ])
+            ->join('out_celup', 'out_celup.id_bon = bon_celup.id_bon', 'left')
+            ->join('schedule_celup', 'out_celup.id_celup = schedule_celup.id_celup', 'left')
+            ->join('pemasukan', 'pemasukan.id_out_celup = out_celup.id_out_celup', 'left')
+            ->where('bon_celup.id_bon', $idBon)
+            ->groupBy('pemasukan.id_pemasukan');
+
+        return $builder->get()->getResultArray(); // Mengembalikan data dalam bentuk array
+    }
 }

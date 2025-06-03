@@ -258,4 +258,44 @@ class PemasukanModel extends Model
             ->get()
             ->getRowArray(); // Ambil satu baris saja
     }
+    public function getFilterDatangBenang2($key, $tanggal_awal, $tanggal_akhir)
+    {
+        $this->select('bon_celup.id_bon, schedule_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(out_celup.kgs_kirim) AS kgs_kirim, SUM(out_celup.cones_kirim) AS cones_kirim, SUM(out_celup.karung_kirim) AS karung_kirim, pemasukan.tgl_masuk, GROUP_CONCAT(DISTINCT pemasukan.nama_cluster) AS nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, open_po.kg_po, GROUP_CONCAT(DISTINCT out_celup.lot_kirim) AS lot_kirim, bon_celup.no_surat_jalan, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->join('master_order', 'master_order.no_model = schedule_celup.no_model', 'left')
+            ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
+            ->groupBy('bon_celup.id_bon')
+            ->orderBy('pemasukan.tgl_masuk', 'DESC');
+
+
+        // Cek apakah ada input key untuk pencarian
+        if (!empty($key)) {
+            $this->groupStart()
+
+                ->like('schedule_celup.no_model', $key)
+                ->orLike('schedule_celup.item_type', $key)
+                ->orLike('schedule_celup.kode_warna', $key)
+                ->orLike('schedule_celup.warna', $key)
+                ->groupEnd();
+        }
+
+        // Filter berdasarkan tanggal
+        if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
+            $this->groupStart();
+            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
+                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal)
+                    ->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+            } elseif (!empty($tanggal_awal)) {
+                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal);
+            } elseif (!empty($tanggal_akhir)) {
+                $this->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+            }
+            $this->groupEnd();
+        }
+
+
+        return $this->findAll();
+    }
 }

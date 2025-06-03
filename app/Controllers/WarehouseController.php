@@ -2379,11 +2379,7 @@ class WarehouseController extends BaseController
     public function savePemasukan2()
     {
         $data = $this->request->getPost();
-        // dd($data);
 
-        // $bonCelup = $this->bonCelupModel; // Sesuaikan dengan model kamu
-        // $outCelup = $this->outCelupModel; // Sesuaikan dengan model kamu
-        // $pemasukan = $this->outCelupModel; // Sesuaikan dengan model kamu
         $dataBonCelup = [
             'tgl_datang' => $data['tgl_datang'],
             'no_surat_jalan' => $data['no_surat_jalan'],
@@ -2442,8 +2438,8 @@ class WarehouseController extends BaseController
                         if ($existingStock) {
                             $this->stockModel->update($existingStock['id_stock'], [
                                 'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs'][$i],
-                                'cns_in_out' => $existingStock['cns_in_out'] + $data['cones'],
-                                'krg_in_out' => $existingStock['krg_in_out'] + $data['karung']
+                                'cns_in_out' => $existingStock['cns_in_out'] + $data['cones'][$i],
+                                'krg_in_out' => $existingStock['krg_in_out'] + $data['karung'][$i]
                             ]);
                             $idStok = $existingStock['id_stock'];
                         } else {
@@ -2457,6 +2453,8 @@ class WarehouseController extends BaseController
                                 'krg_in_out'    => $data['karung'][$i],
                                 'lot_stock'     => $data['lot'],
                                 'nama_cluster'  => $data['nama_cluster'][$i],
+                                'admin' => session()->get('username'),
+                                'created_at' => date('Y-m-d H:i:s'),
                             ];
                             $saveStock = $this->stockModel->insert($dataStock);
                             $idStok = $this->stockModel->getInsertID();
@@ -2482,6 +2480,339 @@ class WarehouseController extends BaseController
         }
 
         return redirect()->to(base_url($this->role . "/pemasukan2"));
-        // dd($data);
+    }
+    public function reportDatangBenang2()
+    {
+        $data = [
+            'role' => $this->role,
+            'title' => 'Report Datang Benang',
+            'active' => $this->active
+        ];
+        return view($this->role . '/warehouse/report-datang-benang2', $data);
+    }
+    public function filterDatangBenang2()
+    {
+        $key = $this->request->getGet('key');
+        $tanggalAwal = $this->request->getGet('tanggal_awal');
+        $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+
+        $data = $this->pemasukanModel->getFilterDatangBenang2($key, $tanggalAwal, $tanggalAkhir);
+
+        return $this->response->setJSON($data);
+    }
+    public function editPemasukanBon($idBon)
+    {
+        $no_model   = $this->scheduleCelupModel->getCelupDone();
+        $dataIn     = $this->bonCelupModel->getDataPemasukan($idBon);
+        $cluster    = $this->clusterModel->orderBy('nama_cluster', 'ASC')->findAll();
+
+        $data = [
+            'role' => $this->role,
+            'title' => 'Edit Datang Benang',
+            'active' => $this->active,
+            'no_model' => $no_model,
+            'dataIn' => $dataIn,
+            'cluster' => $cluster
+        ];
+        return view($this->role . '/warehouse/form-edit-pemasukan', $data);
+    }
+    // public function prosesEditPemasukanBon()
+    // {
+    //     // $data = $this->request->getPost();
+    //     // // dd($data);
+    //     // // update data bon
+    //     // try {
+    //     //     $updateBon = $this->bonCelupModel->update($data['id_bon'], [
+    //     //         'tgl_datang' => $data['tgl_datang'],
+    //     //         'no_surat_jalan' => $data['no_surat_jalan'],
+    //     //         'detail_sj' => $data['detail_sj'],
+    //     //         'admin' => session('username'),
+    //     //         'updated_at' => date('Y-m-d H:i:s')
+    //     //     ]);
+    //     //     if ($updateBon) {
+    //     //         // update data out celup
+    //     //         $rowsData = count($data['id_out_celup']);
+    //     //         for ($i = 0; $i < $rowsData; $i++) {
+    //     //             // Jika id_out_celup != 0, lakukan update
+    //     //             if (!empty($data['id_out_celup'][$i])) {
+    //     //                 $updateOutCelup = $this->outCelupModel->update($data['id_out_celup'][$i], [
+    //     //                     'l_m_d' => $data['l_m_d'][$i],
+    //     //                     'harga' => $data['harga'][$i],
+    //     //                     'gw_kirim' => $data['gw'][$i],
+    //     //                     'kgs_kirim' => $data['kgs_kirim'][$i],
+    //     //                     'cones_kirim' => $data['cones_kirim'][$i],
+    //     //                     'karung_kirim' => $data['karung_kirim'][$i],
+    //     //                     'ganti_retur' => $data['ganti_retur'][$i],
+    //     //                     'admin' => session('username'),
+    //     //                     'updated_at' => date('Y-m-d H:i:s'),
+    //     //                 ]);
+
+    //     //                 if ($updateOutCelup) {
+    //     //                     $updatePemasukan = $this->pemasukanModel->update($data['id_pemasukan'][$i], [
+    //     //                         'admin' => session('username'),
+    //     //                         'updated_at' => date('Y-m-d H:i:s'),
+    //     //                     ]);
+
+    //     //                     if ($updatePemasukan) {
+    //     //                         // Update stok
+    //     //                         $existingStock = $this->stockModel
+    //     //                             ->where('no_model', $data['no_model'][$i])
+    //     //                             ->where('item_type', $data['item_type'][$i])
+    //     //                             ->where('kode_warna', $data['kode_warna'][$i])
+    //     //                             ->where('lot_stock', $data['lot'][$i])
+    //     //                             ->where('nama_cluster', $data['nama_cluster'][$i])
+    //     //                             ->first();
+
+    //     //                         $this->stockModel->update($existingStock['id_stock'], [
+    //     //                             'kgs_in_out' => $existingStock['kgs_in_out'] - $data['kgs_old'][$i] + $data['kgs'][$i],
+    //     //                             'cns_in_out' => $existingStock['cns_in_out'] - $data['cones_old'][$i] + $data['cones'][$i],
+    //     //                             'krg_in_out' => $existingStock['krg_in_out'] - $data['karung_old'][$i] + $data['karung'][$i],
+    //     //                             'admin' => session('username'),
+    //     //                             'updated_at' => date('Y-m-d H:i:s'),
+    //     //                         ]);
+    //     //                     }
+    //     //                 }
+    //     //             } else {
+    //     //                 // Jika id_out_celup kosong, lakukan insert
+    //     //                 $newOutCelupId = $this->outCelupModel->insert([
+    //     //                     'id_bon' => $data['id_bon'],
+    //     //                     'l_m_d' => $data['l_m_d'][$i],
+    //     //                     'harga' => $data['harga'][$i],
+    //     //                     'gw_kirim' => $data['gw'][$i],
+    //     //                     'kgs_kirim' => $data['kgs_kirim'][$i],
+    //     //                     'cones_kirim' => $data['cones_kirim'][$i],
+    //     //                     'karung_kirim' => $data['karung_kirim'][$i],
+    //     //                     'ganti_retur' => $data['ganti_retur'][$i],
+    //     //                     'admin' => session('username'),
+    //     //                     'created_at' => date('Y-m-d H:i:s'),
+    //     //                 ]);
+
+    //     //                 if ($newOutCelupId) {
+    //     //                     // Insert ke pemasukan
+    //     //                     $this->pemasukanModel->insert([
+    //     //                         'id_out_celup' => $newOutCelupId,
+    //     //                         'nama_cluster' => $data['nama_cluster'][$i],
+    //     //                         'tgl_masuk' => $data['tgl_datang'],
+    //     //                         'admin' => session('username'),
+    //     //                         'created_at' => date('Y-m-d H:i:s'),
+    //     //                     ]);
+
+    //     //                     // Insert/update stok
+    //     //                     $existingStock = $this->stockModel
+    //     //                         ->where('no_model', $data['no_model'][$i])
+    //     //                         ->where('item_type', $data['item_type'][$i])
+    //     //                         ->where('kode_warna', $data['kode_warna'][$i])
+    //     //                         ->where('lot_stock', $data['lot'][$i])
+    //     //                         ->where('nama_cluster', $data['nama_cluster'][$i])
+    //     //                         ->first();
+
+    //     //                     if ($existingStock) {
+    //     //                         $this->stockModel->update($existingStock['id_stock'], [
+    //     //                             'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs'][$i],
+    //     //                             'cns_in_out' => $existingStock['cns_in_out'] + $data['cones'][$i],
+    //     //                             'krg_in_out' => $existingStock['krg_in_out'] + $data['karung'][$i],
+    //     //                             'admin' => session('username'),
+    //     //                             'updated_at' => date('Y-m-d H:i:s'),
+    //     //                         ]);
+    //     //                     } else {
+    //     //                         $saveStock = $this->stockModel->insert([
+    //     //                             'no_model' => $data['no_model'][$i],
+    //     //                             'item_type' => $data['item_type'][$i],
+    //     //                             'kode_warna' => $data['kode_warna'][$i],
+    //     //                             'lot_stock' => $data['lot'][$i],
+    //     //                             'nama_cluster' => $data['nama_cluster'][$i],
+    //     //                             'kgs_in_out' => $data['kgs'][$i],
+    //     //                             'cns_in_out' => $data['cones'][$i],
+    //     //                             'krg_in_out' => $data['karung'][$i],
+    //     //                             'admin' => session('username'),
+    //     //                             'created_at' => date('Y-m-d H:i:s'),
+    //     //                         ]);
+    //     //                         $saveStock = $this->stockModel->insert($dataStock);
+    //     //                     $idStok = $this->stockModel->getInsertID();
+    //     //                 }
+    //     //                 // update id stock in pemasukan
+    //     //                 $updateIdStock = $this->pemasukanModel->update($id_pemasukan, [
+    //     //                     'id_stock' => $idStok
+    //     //                 ]);
+    //     //             } // Set flashdata untuk pesan sukses
+    //     //         }
+    //     //         session()->setFlashdata('success', 'Data berhasil diperbarui.');
+    //     //     } else {
+    //     //         session()->setFlashdata('error', 'Gagal memperbarui data bon.');
+    //     //     }
+    //     // } catch (\Exception $e) {
+    //     //     session()->setFlashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    //     // }
+    //     // // Redirect ke halaman yang sesuai
+    //     // return redirect()->to(base_url($this->role . "/warehouse/reportDatangBenang2"));
+    // }
+    public function prosesEditPemasukanBon()
+    {
+        $data = $this->request->getPost();
+
+        try {
+            // Mulai transaksi
+            $this->db->transStart();
+
+            // Update data bon
+            $updateBon = $this->bonCelupModel->update($data['id_bon'], [
+                'tgl_datang' => $data['tgl_datang'],
+                'no_surat_jalan' => $data['no_surat_jalan'],
+                'detail_sj' => $data['detail_sj'],
+                'admin' => session('username'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            if (!$updateBon) {
+                throw new \Exception('Gagal memperbarui data bon.');
+            }
+            // Update data out celup dan pemasukan
+            $rowsData = count($data['id_out_celup']);
+            for ($i = 0; $i < $rowsData; $i++) {
+                $idOutCelup = $data['id_out_celup'][$i];
+
+                if (!empty($idOutCelup)) {
+                    // Update out celup
+                    $updateOutCelup = $this->outCelupModel->update($idOutCelup, [
+                        'l_m_d' => $data['l_m_d'][$i],
+                        'harga' => $data['harga'][$i],
+                        'gw_kirim' => $data['gw'][$i],
+                        'kgs_kirim' => $data['kgs_kirim'][$i],
+                        'cones_kirim' => $data['cones_kirim'][$i],
+                        'karung_kirim' => $data['karung_kirim'][$i],
+                        'ganti_retur' => $data['ganti_retur'][$i],
+                        'admin' => session('username'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+
+                    if (!$updateOutCelup) {
+                        throw new \Exception('Gagal memperbarui data out celup.');
+                    }
+
+                    // Update pemasukan
+                    $updatePemasukan = $this->pemasukanModel->update($data['id_pemasukan'][$i], [
+                        'admin' => session('username'),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+
+                    if (!$updatePemasukan) {
+                        throw new \Exception('Gagal memperbarui data pemasukan.');
+                    }
+
+                    // Update stok
+                    $existingStock = $this->stockModel
+                        ->where('no_model', $data['no_model'][$i])
+                        ->where('item_type', $data['item_type'][$i])
+                        ->where('kode_warna', $data['kode_warna'][$i])
+                        ->where('lot_stock', $data['lot'][$i])
+                        ->where('nama_cluster', $data['nama_cluster'][$i])
+                        ->first();
+
+                    if ($existingStock) {
+                        $updateStock = $this->stockModel->update($existingStock['id_stock'], [
+                            'kgs_in_out' => $existingStock['kgs_in_out'] - $data['kgs_old'][$i] + $data['kgs'][$i],
+                            'cns_in_out' => $existingStock['cns_in_out'] - $data['cones_old'][$i] + $data['cones'][$i],
+                            'krg_in_out' => $existingStock['krg_in_out'] - $data['karung_old'][$i] + $data['karung'][$i],
+                            'admin' => session('username'),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+
+                        if (!$updateStock) {
+                            throw new \Exception('Gagal memperbarui data stok.');
+                        }
+                    }
+                } else {
+                    // Insert data baru jika id_out_celup kosong
+                    $newOutCelup = $this->outCelupModel->insert([
+                        'id_bon' => $data['id_bon'],
+                        'l_m_d' => $data['l_m_d'][$i],
+                        'harga' => $data['harga'][$i],
+                        'gw_kirim' => $data['gw'][$i],
+                        'kgs_kirim' => $data['kgs_kirim'][$i],
+                        'cones_kirim' => $data['cones_kirim'][$i],
+                        'karung_kirim' => $data['karung_kirim'][$i],
+                        'ganti_retur' => $data['ganti_retur'][$i],
+                        'admin' => session('username'),
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                    if (!$newOutCelup) {
+                        throw new \Exception('Gagal menambahkan data out celup.');
+                    }
+                    $id_out_celup = $this->pemasukanModel->insertID(); // Mengambil ID yang baru saja diinsert
+
+                    // Insert pemasukan
+                    $newPemasukan = $this->pemasukanModel->insert([
+                        'id_out_celup' => $id_out_celup,
+                        'nama_cluster' => $data['nama_cluster'][$i],
+                        'tgl_masuk' => $data['tgl_datang'],
+                        'admin' => session('username'),
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                    $idPemasukanNew = $this->stockModel->getInsertID();
+
+
+                    if (!$newPemasukan) {
+                        throw new \Exception('Gagal menambahkan data pemasukan.');
+                    }
+
+                    // Insert atau update stok
+                    $existingStock = $this->stockModel
+                        ->where('no_model', $data['no_model'][$i])
+                        ->where('item_type', $data['item_type'][$i])
+                        ->where('kode_warna', $data['kode_warna'][$i])
+                        ->where('lot_stock', $data['lot'][$i])
+                        ->where('nama_cluster', $data['nama_cluster'][$i])
+                        ->first();
+
+                    if ($existingStock) {
+                        // Update stok
+                        $this->stockModel->update($existingStock['id_stock'], [
+                            'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs_kirim'][$i],
+                            'cns_in_out' => $existingStock['cns_in_out'] + $data['cones_kirim'][$i],
+                            'krg_in_out' => $existingStock['krg_in_out'] + $data['karung_kirim'][$i],
+                            'admin' => session('username'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        $idStok = $existingStock['id_stock'];
+                    } else {
+                        // Insert stok baru
+                        $saveStock = $this->stockModel->insert([
+                            'no_model' => $data['no_model'][$i],
+                            'item_type' => $data['item_type'][$i],
+                            'kode_warna' => $data['kode_warna'][$i],
+                            'lot_stock' => $data['lot'][$i],
+                            'nama_cluster' => $data['nama_cluster'][$i],
+                            'kgs_in_out' => $data['kgs_kirim'][$i],
+                            'cns_in_out' => $data['cones_kirim'][$i],
+                            'krg_in_out' => $data['karung_kirim'][$i],
+                            'admin' => session('username'),
+                            'created_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        $idStok = $this->stockModel->getInsertID();
+                    }
+                    // Update id_stock di tabel pemasukan
+                    $updateIdStock = $this->pemasukanModel->update($idPemasukanNew, [
+                        'id_stock' => $idStok
+                    ]);
+
+                    if (!$updateIdStock) {
+                        throw new \Exception('Gagal memperbarui id_stock di tabel pemasukan.');
+                    }
+                }
+            } // Commit transaksi
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                throw new \Exception('Terjadi kesalahan saat menyimpan data.');
+            }
+
+            session()->setFlashdata('success', 'Data berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // Rollback transaksi jika ada kesalahan
+            $this->db->transRollback();
+            session()->setFlashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+
+        // Redirect ke halaman yang sesuai
+        return redirect()->to(base_url($this->role . "/warehouse/reportDatangBenang2"));
     }
 }
