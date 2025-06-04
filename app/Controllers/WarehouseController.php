@@ -2650,6 +2650,20 @@ class WarehouseController extends BaseController
     {
         $data = $this->request->getPost();
 
+        // $rowsData = count($data['id_out_celup']);
+        // var_dump($rowsData);
+        // for ($i = 0; $i < $rowsData; $i++) {
+        //     $idOutCelup = $data['id_out_celup'][$i];
+        //     var_dump($idOutCelup);
+        //     if ($idOutCelup != 0) {
+        //         echo "aaaa";
+        //     } else {
+        //         echo "bbb";
+        //     }
+        // }
+
+
+        // dd($data);
         try {
             // Mulai transaksi
             $this->db->transStart();
@@ -2670,16 +2684,16 @@ class WarehouseController extends BaseController
             for ($i = 0; $i < $rowsData; $i++) {
                 $idOutCelup = $data['id_out_celup'][$i];
 
-                if (!empty($idOutCelup)) {
+                if ($idOutCelup != 0) {
                     // Update out celup
                     $updateOutCelup = $this->outCelupModel->update($idOutCelup, [
-                        'l_m_d' => $data['l_m_d'][$i],
-                        'harga' => $data['harga'][$i],
-                        'gw_kirim' => $data['gw'][$i],
-                        'kgs_kirim' => $data['kgs_kirim'][$i],
-                        'cones_kirim' => $data['cones_kirim'][$i],
-                        'karung_kirim' => $data['karung_kirim'][$i],
-                        'ganti_retur' => $data['ganti_retur'][$i],
+                        'l_m_d' => $data['l_m_d'],
+                        'harga' => $data['harga'],
+                        'gw_kirim' => $data['gw'],
+                        'kgs_kirim' => $data['kgs'][$i],
+                        'cones_kirim' => $data['cones'][$i],
+                        'karung_kirim' => $data['karung'][$i],
+                        'ganti_retur' => $data['ganti_retur'],
                         'admin' => session('username'),
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
@@ -2700,10 +2714,10 @@ class WarehouseController extends BaseController
 
                     // Update stok
                     $existingStock = $this->stockModel
-                        ->where('no_model', $data['no_model'][$i])
-                        ->where('item_type', $data['item_type'][$i])
-                        ->where('kode_warna', $data['kode_warna'][$i])
-                        ->where('lot_stock', $data['lot'][$i])
+                        ->where('no_model', $data['no_model'])
+                        ->where('item_type', $data['item_type'])
+                        ->where('kode_warna', $data['kode_warna'])
+                        ->where('lot_stock', $data['lot'])
                         ->where('nama_cluster', $data['nama_cluster'][$i])
                         ->first();
 
@@ -2723,14 +2737,16 @@ class WarehouseController extends BaseController
                 } else {
                     // Insert data baru jika id_out_celup kosong
                     $newOutCelup = $this->outCelupModel->insert([
+                        'id_celup' => $data['id_celup'],
                         'id_bon' => $data['id_bon'],
-                        'l_m_d' => $data['l_m_d'][$i],
-                        'harga' => $data['harga'][$i],
-                        'gw_kirim' => $data['gw'][$i],
-                        'kgs_kirim' => $data['kgs_kirim'][$i],
-                        'cones_kirim' => $data['cones_kirim'][$i],
-                        'karung_kirim' => $data['karung_kirim'][$i],
-                        'ganti_retur' => $data['ganti_retur'][$i],
+                        'l_m_d' => $data['l_m_d'],
+                        'harga' => $data['harga'],
+                        'gw_kirim' => $data['gw'],
+                        'kgs_kirim' => $data['kgs'][$i],
+                        'cones_kirim' => $data['cones'][$i],
+                        'karung_kirim' => $data['karung'][$i],
+                        'lot_kirim' => $data['lot'],
+                        'ganti_retur' => $data['ganti_retur'],
                         'admin' => session('username'),
                         'created_at' => date('Y-m-d H:i:s')
                     ]);
@@ -2756,19 +2772,19 @@ class WarehouseController extends BaseController
 
                     // Insert atau update stok
                     $existingStock = $this->stockModel
-                        ->where('no_model', $data['no_model'][$i])
-                        ->where('item_type', $data['item_type'][$i])
-                        ->where('kode_warna', $data['kode_warna'][$i])
-                        ->where('lot_stock', $data['lot'][$i])
+                        ->where('no_model', $data['no_model'])
+                        ->where('item_type', $data['item_type'])
+                        ->where('kode_warna', $data['kode_warna'])
+                        ->where('lot_stock', $data['lot'])
                         ->where('nama_cluster', $data['nama_cluster'][$i])
                         ->first();
 
                     if ($existingStock) {
                         // Update stok
                         $this->stockModel->update($existingStock['id_stock'], [
-                            'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs_kirim'][$i],
-                            'cns_in_out' => $existingStock['cns_in_out'] + $data['cones_kirim'][$i],
-                            'krg_in_out' => $existingStock['krg_in_out'] + $data['karung_kirim'][$i],
+                            'kgs_in_out' => $existingStock['kgs_in_out'] + $data['kgs'][$i],
+                            'cns_in_out' => $existingStock['cns_in_out'] + $data['cones'][$i],
+                            'krg_in_out' => $existingStock['krg_in_out'] + $data['karung'][$i],
                             'admin' => session('username'),
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
@@ -2776,14 +2792,15 @@ class WarehouseController extends BaseController
                     } else {
                         // Insert stok baru
                         $saveStock = $this->stockModel->insert([
-                            'no_model' => $data['no_model'][$i],
-                            'item_type' => $data['item_type'][$i],
-                            'kode_warna' => $data['kode_warna'][$i],
-                            'lot_stock' => $data['lot'][$i],
+                            'no_model' => $data['no_model'],
+                            'item_type' => $data['item_type'],
+                            'kode_warna' => $data['kode_warna'],
+                            'warna' => $data['warna'],
+                            'lot_stock' => $data['lot'],
                             'nama_cluster' => $data['nama_cluster'][$i],
-                            'kgs_in_out' => $data['kgs_kirim'][$i],
-                            'cns_in_out' => $data['cones_kirim'][$i],
-                            'krg_in_out' => $data['karung_kirim'][$i],
+                            'kgs_in_out' => $data['kgs'][$i],
+                            'cns_in_out' => $data['cones'][$i],
+                            'krg_in_out' => $data['karung'][$i],
                             'admin' => session('username'),
                             'created_at' => date('Y-m-d H:i:s'),
                         ]);

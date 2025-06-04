@@ -285,12 +285,12 @@ class PemasukanModel extends Model
         if (!empty($tanggal_awal) || !empty($tanggal_akhir)) {
             $this->groupStart();
             if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal)
-                    ->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $this->where('bon_celup.tgl_datang >=', $tanggal_awal)
+                    ->where('bon_celup.tgl_datang <=', $tanggal_akhir);
             } elseif (!empty($tanggal_awal)) {
-                $this->where('pemasukan.tgl_masuk >=', $tanggal_awal);
+                $this->where('bon_celup.tgl_datang >=', $tanggal_awal);
             } elseif (!empty($tanggal_akhir)) {
-                $this->where('pemasukan.tgl_masuk <=', $tanggal_akhir);
+                $this->where('bon_celup.tgl_datang <=', $tanggal_akhir);
             }
             $this->groupEnd();
         }

@@ -2,6 +2,29 @@
 <?php $this->section('content'); ?>
 
 <div class="container-fluid py-4">
+    <?php if (session()->getFlashdata('success')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    html: '<?= session()->getFlashdata('success') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    html: '<?= session()->getFlashdata('error') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
 
     <!-- Button Filter -->
     <div class="card card-frame">

@@ -82,7 +82,7 @@
                                             <div class="row g-3 mb-2">
                                                 <div class="col-md-12">
                                                     <label for="itemType">Done Celup</label>
-                                                    <select class="form-control" id="add_item" name="add_item" required disabled>
+                                                    <select class="form-control" id="add_item" name="add_item" required readonly disabled>
                                                         <option value="">Pilih Item </option>
                                                         <?php foreach ($no_model as $item): ?>
                                                             <option value="<?= $item['id_celup'] ?>" <?= $item['id_celup'] == $dataIn[0]['id_celup'] ? 'selected' : '' ?>>
@@ -129,7 +129,6 @@
                                                     <label>LMD</label>
                                                     <select class="form-control" name="l_m_d" id="l_m_d" placeholder="L/M/D" value="<?= $dataIn[0]['l_m_d'] ?>" required>
                                                         <option value="">Pilih LMD</option>
-                                                        <option value="COVER MAJALAYA" <?= $dataIn[0]['detail_sj'] == "COVER MAJALAYA" ? "selected" : "" ?>>COVER MAJALAYA</option>
                                                         <option value="L" <?= $dataIn[0]['l_m_d'] == "L" ? "selected" : "" ?>>L</option>
                                                         <option value="M" <?= $dataIn[0]['l_m_d'] == "M" ? "selected" : "" ?>>M</option>
                                                         <option value="D" <?= $dataIn[0]['l_m_d'] == "D" ? "selected" : "" ?>>D</option>
@@ -191,23 +190,26 @@
                                                             ?>
                                                                 <tr>
                                                                     <!-- kolom hide -->
-                                                                    <input type="text" name="id_out_celup[<?= $index ?>]" id="id_out_celup" value="<?= $dataIn[$index]['id_out_celup'] ?>" hidden>
-                                                                    <input type="text" name="id_pemasukan[<?= $index ?>]" id="id_pemasukan" value="<?= $dataIn[$index]['id_pemasukan'] ?>" hidden>
+                                                                    <input type="text" name="id_out_celup[<?= $index ?>]" value="<?= $dataIn[$index]['id_out_celup'] ?>" hidden>
+                                                                    <input type="text" name="id_pemasukan[<?= $index ?>]" value="<?= $dataIn[$index]['id_pemasukan'] ?>" hidden>
                                                                     <input type="number" step="0.01" class="form-control kgs_old" name="kgs_old[<?= $index ?>]" value="<?= $in['kgs_kirim'] ?>" hidden>
-                                                                    <input type="float" class="form-control cones_old" name="cones_old[<?= $index ?>]" value="<?= $in['cones_kirim'] ?>" hidden>
-                                                                    <input type="float" class="form-control karung_old" name="karung_old[<?= $index ?>]" value="<?= $in['karung_kirim'] ?>" hidden>
+                                                                    <input type="number" class="form-control cones_old" name="cones_old[<?= $index ?>]" value="<?= $in['cones_kirim'] ?>" hidden>
+                                                                    <input type="number" class="form-control karung_old" name="karung_old[<?= $index ?>]" value="<?= $in['karung_kirim'] ?>" hidden>
                                                                     <!--  -->
 
-                                                                    <td><select class="form-select text-center nama_cluster" name="nama_cluster[<?= $index ?>]" disabled>
+                                                                    <td>
+                                                                        <select class="form-select text-center nama_cluster" name="nama_cluster_display[<?= $index ?>]" disabled>
                                                                             <option value="">Pilih Cluster</option>
                                                                             <?php foreach ($cluster as $c) { ?>
                                                                                 <option value="<?= $c['nama_cluster'] ?>" <?= $c['nama_cluster'] == $dataIn[$index]['nama_cluster'] ? "selected" : "" ?>><?= $c['nama_cluster'] ?></option>
                                                                             <?php } ?>
-                                                                        </select></td>
+                                                                        </select>
+                                                                        <input type="hidden" name="nama_cluster[<?= $index ?>]" value="<?= $dataIn[$index]['nama_cluster'] ?>">
+                                                                    </td>
                                                                     <td><input type="float" class="form-control kapasitas" name="kapasitas[<?= $index ?>]" required readonly></td>
                                                                     <td><input type="number" step="0.01" class="form-control kgs" name="kgs[<?= $index ?>]" value="<?= $in['kgs_kirim'] ?>" required></td>
-                                                                    <td><input type="float" class="form-control cones" name="cones[<?= $index ?>]" value="<?= $in['cones_kirim'] ?>" required></td>
-                                                                    <td><input type="float" class="form-control karung" name="karung[<?= $index ?>]" value="<?= $in['karung_kirim'] ?>" required></td>
+                                                                    <td><input type="number" step="1" class="form-control cones" name="cones[<?= $index ?>]" value="<?= $in['cones_kirim'] ?>" required></td>
+                                                                    <td><input type="number" step="1" class="form-control karung" name="karung[<?= $index ?>]" value="<?= $in['karung_kirim'] ?>" required></td>
                                                                     <td class="text-center">
                                                                     </td>
                                                                 </tr>
@@ -411,13 +413,12 @@
                 const rowCount = tbody.querySelectorAll('tr').length;
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <!-- kolom hide -->
-                    <input type="text" name="id_out_celup[${rowCount}]" id="id_out_celup" value="0" hidden>
-                    <input type="text" name="id_pemasukan[${rowCount}]" id="id_pemasukan" value="0" hidden>
+                    <input type="text" name="id_out_celup[${rowCount}]" value="0" hidden>
+                    <input type="text" name="id_pemasukan[${rowCount}]" value="0" hidden>
                     <input type="number" step="0.01" class="form-control kgs_old" name="kgs_old[${rowCount}]" value="0" hidden>
-                    <input type="float" class="form-control cones_old" name="cones_old[${rowCount}]" value="0" hidden>
-                    <input type="float" class="form-control karung_old" name="karung_old[${rowCount}]" value="0" hidden>
-                    <!--  -->
+                    <input type="number" class="form-control cones_old" name="cones_old[${rowCount}]" value="0" hidden>
+                    <input type="number" class="form-control karung_old" name="karung_old[${rowCount}]" value="0" hidden>
+
                     <td>
                         <select class="form-select text-center nama_cluster" name="nama_cluster[${rowCount}]">
                             ${clusterOptions}
@@ -436,6 +437,8 @@
                 $(newRow).find('.nama_cluster').select2({
                     width: '100%'
                 });
+
+                calculateTotals(poTable);
 
                 // Pasang event pada select & input
                 initExistingRow(newRow);
@@ -485,12 +488,13 @@
             let totalKarung = 0;
             let totalRows = 0;
 
+
             // Hitung total berdasarkan input di dalam poTable
             poTable.querySelectorAll("tbody tr").forEach(row => {
-                totalKgs += parseFloat(row.querySelector("input[name^='kgs']")?.value || 0);
+                totalKgs += parseFloat(row.querySelector("input[name^='kgs']:not([hidden])")?.value || 0);
                 totalKgs = parseFloat(totalKgs.toFixed(2));
-                totalCones += parseFloat(row.querySelector("input[name^='cones']")?.value || 0);
-                totalKarung += parseFloat(row.querySelector("input[name^='karung']")?.value || 0);
+                totalCones += parseFloat(row.querySelector("input[name^='cones']:not([hidden])")?.value || 0);
+                totalKarung += parseFloat(row.querySelector("input[name^='karung']:not([hidden])")?.value || 0);
             });
 
             totalRows = poTable.querySelectorAll("tbody tr").length;
@@ -504,19 +508,6 @@
                 tfoot.querySelector("input[id^='total_karung']").value = totalKarung;
             }
         }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // Untuk tab pertama
-            const firstPoTable = document.querySelector("#poTable-1");
-            if (firstPoTable) {
-                firstPoTable.querySelectorAll("input").forEach(input => {
-                    input.addEventListener("input", function() {
-                        calculateTotals(firstPoTable);
-                    });
-                });
-                calculateTotals(firstPoTable); // Hitung total awal
-            }
-        });
 
         // Event listener tombol
         // newTabPane.querySelector(".add-more").addEventListener("click", addNewTab);
