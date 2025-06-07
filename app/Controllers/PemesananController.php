@@ -157,7 +157,7 @@ class PemesananController extends BaseController
             'tglPakai' => $tglPakai,
         ];
 
-        return view($this->role . '/pemesanan/detailpemesanan', $data);
+        return view($this->role . '/pemesanan/detailpemesanan2', $data);
     }
 
 
@@ -708,5 +708,19 @@ class PemesananController extends BaseController
             'tglPakai' => $tglPakai,
         ];
         return view($this->role . '/pemesanan/persiapanBarangPertgl', $data);
+    }
+    public function selectClusterWarehouse2($area, $jenis, $tglPakai)
+    {
+        $getPemesanan = $this->pemesananModel->getPemesananByAreaJenisTglPakai($area, $jenis, $tglPakai);
+        // $getPemesanan = $this->totalPemesananModel->getStock($area, $jenis, $tglPakai);
+        // dd($getPemesanan);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'pemesanan' => $getPemesanan
+        ];
+
+        return view($this->role . '/pemesanan/select-cluster2', $data);
     }
 }

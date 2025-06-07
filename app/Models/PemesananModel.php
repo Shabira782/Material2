@@ -641,4 +641,32 @@ class PemesananModel extends Model
 
         return $query->get()->getResultArray();
     }
+    public function getPemesananByAreaJenisTglPakai($area, $jenis, $tglPakai)
+    {
+        $builder = $this->select('
+            master_material.jenis, 
+            pemesanan.lot, 
+            pemesanan.keterangan, 
+            total_pemesanan.*, 
+            stock.id_stock, stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.nama_cluster,
+            stock.nama_cluster, (stock.kgs_stock_awal + stock.kgs_in_out) as kg_stock, 
+            (stock.cns_stock_awal + stock.cns_in_out) as cns_stock,
+            (stock.krg_stock_awal + stock.krg_in_out) as krg_stock
+        ');
+
+        $builder->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left');
+        $builder->join('material', 'pemesanan.id_material = material.id_material', 'left');
+        $builder->join('master_material', 'master_material.item_type = material.item_type', 'left');
+        $builder->join('master_order', 'master_order.id_order = material.id_order', 'left');
+        $builder->join('stock', 'stock.item_type = material.item_type AND stock.kode_warna = material.kode_warna AND stock.warna = material.color AND master_order.no_model=stock.no_model', 'left');
+
+        $builder->where('pemesanan.admin', $area);
+        $builder->where('master_material.jenis', $jenis);
+        $builder->where('pemesanan.tgl_pakai', $tglPakai);
+        $builder->where('pemesanan.status_kirim', 'YA');
+        $builder->groupBy('id_stock');
+        $builder->orderBy('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, stock.nama_cluster', 'ASC');
+
+        return $builder->get()->getResultArray();
+    }
 }
