@@ -120,7 +120,7 @@
                                                     <span class="badge bg-info"><?= $data['status'] ?></span>
                                                 <?php endif; ?>
                                             <?php else: ?>
-                                                <a href="<?= base_url($role . '/selectClusterWarehouse/' . $data['id_total_pemesanan']) . '?Area=' . $area . '&KgsPesan=' . $data['ttl_kg'] . '&CnsPesan=' . $data['ttl_cns'] ?>"
+                                                <a href="<?= base_url($role . '/pengirimanArea/' . $data['id_total_pemesanan']) ?>"
                                                     class="btn bg-gradient-success">
                                                     <i class="fas fa-paper-plane"></i>Send
                                                 </a>
@@ -146,12 +146,7 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script type="text/javascript">
-    $('#dataTable').DataTable({
-        "pageLength": 35,
-        "order": []
-    });
-</script>
+
+
 
 <?php $this->endSection(); ?>

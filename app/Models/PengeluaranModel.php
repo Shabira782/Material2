@@ -14,7 +14,7 @@ class PengeluaranModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'id_pengeluaran',
-        'id_out_celup',
+        // 'id_out_celup',
         'area_out',
         'tgl_out',
         'kgs_out',
@@ -168,5 +168,42 @@ class PengeluaranModel extends Model
             ->orderBy('pengeluaran.nama_cluster, pengeluaran.area_out', 'ASC')
             ->get() // Dapatkan objek query
             ->getResultArray(); // Konversi ke array hasil
+    }
+    public function getPengeluaranByPemesanan($idTotalPemesanan)
+    {
+        $builder = $this->select('
+            master_material.jenis, 
+            pemesanan.lot, 
+            pemesanan.keterangan, 
+            total_pemesanan.*, 
+            stock.id_stock, 
+            master_order.no_model, 
+            material.item_type, 
+            material.kode_warna, 
+            material.color, 
+            stock.nama_cluster,
+            stock.nama_cluster, (stock.kgs_stock_awal + stock.kgs_in_out) as kg_stock, 
+            (stock.cns_stock_awal + stock.cns_in_out) as cns_stock,
+            (stock.krg_stock_awal + stock.krg_in_out) as krg_stock,
+            GROUP_CONCAT(DISTINCT stock.lot_awal, stock.lot_stock) AS lot_stock,
+            pengeluaran.id_pengeluaran,
+            pengeluaran.kgs_out,
+            pengeluaran.cns_out,
+            pengeluaran.krg_out
+        ');
+
+        $builder->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan', 'left');
+        $builder->join('pemesanan', 'pemesanan.id_total_pemesanan=total_pemesanan.id_total_pemesanan');
+        $builder->join('material', 'pemesanan.id_material = material.id_material', 'left');
+        $builder->join('master_material', 'master_material.item_type = material.item_type', 'left');
+        $builder->join('master_order', 'master_order.id_order = material.id_order', 'left');
+        $builder->join('stock', 'stock.item_type = material.item_type AND stock.kode_warna = material.kode_warna AND stock.warna = material.color AND master_order.no_model=stock.no_model AND stock.nama_cluster=pengeluaran.nama_cluster AND lot_stock=pengeluaran.lot_out', 'left');
+
+        $builder->where('total_pemesanan.id_total_pemesanan', $idTotalPemesanan);
+        $builder->where('pemesanan.status_kirim', 'YA');
+        $builder->groupBy('stock.id_stock, , total_pemesanan.id_total_pemesanan');
+        $builder->orderBy('pengeluaran.id_pengeluaran', 'ASC');
+
+        return $builder->get()->getResultArray();
     }
 }

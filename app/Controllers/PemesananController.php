@@ -718,9 +718,22 @@ class PemesananController extends BaseController
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
+            'area' => $area,
             'pemesanan' => $getPemesanan
         ];
 
         return view($this->role . '/pemesanan/select-cluster2', $data);
+    }
+    public function pengirimanArea2($idTotalPemesanan)
+    {
+        $pengeluaran = $this->pengeluaranModel->getPengeluaranByPemesanan($idTotalPemesanan);
+        // dd($pengeluaran);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'data' => $pengeluaran
+        ];
+        return view($this->role . '/warehouse/form-pengeluaran2', $data);
     }
 }

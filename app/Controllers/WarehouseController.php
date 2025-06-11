@@ -2832,4 +2832,84 @@ class WarehouseController extends BaseController
         // Redirect ke halaman yang sesuai
         return redirect()->to(base_url($this->role . "/warehouse/reportDatangBenang2"));
     }
+    public function saveSelectCluster()
+    {
+        $data = $this->request->getJSON(); // Data dalam bentuk objek
+        log_message('info', 'Received data: ' . json_encode($data));
+
+        // Pastikan data memiliki properti 'selectedData'
+        if (!isset($data->selectedData) || !is_array($data->selectedData) || empty($data->selectedData)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No valid data provided'
+            ])->setStatusCode(400);
+        }
+
+        // Akses 'selectedData' sebagai array objek
+        $selectedData = $data->selectedData;
+
+        foreach ($selectedData as $item) {
+            // Validasi data setiap item
+            if (!isset($item->id_total_pemesanan, $item->area_out, $item->lot_out, $item->nama_cluster)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Incomplete data for one or more items'
+                ])->setStatusCode(400);
+            }
+
+            // Simpan setiap item ke database
+            $this->pengeluaranModel->save([
+                'id_total_pemesanan' => $item->id_total_pemesanan,
+                'area_out' => $item->area_out,
+                'lot_out' => $item->lot_out,
+                'nama_cluster' => $item->nama_cluster,
+                'status' => "Pengeluaran Jalur",
+                'admin' => session('username'),
+                'created_at' => date("Y-m-d H:i:s")
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data inserted successfully'
+        ]);
+    }
+    public function deleteSelectCluster()
+    {
+        $data = $this->request->getJSON(); // Data dalam bentuk objek
+        log_message('info', 'Received data: ' . json_encode($data));
+
+        // Pastikan data memiliki properti 'selectedData'
+        if (!isset($data->selectedData) || !is_array($data->selectedData) || empty($data->selectedData)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No valid data provided'
+            ])->setStatusCode(400);
+        }
+
+        // Akses 'selectedData' sebagai array objek
+        $selectedData = $data->selectedData;
+
+        foreach ($selectedData as $item) {
+            // Validasi data setiap item
+            if (!isset($item->id_pengeluaran)) {
+                continue; // Abaikan item tanpa id_pengeluaran
+            }
+
+            // Lakukan penghapusan berdasarkan id_pengeluaran
+            $deleted = $this->pengeluaranModel->delete(['id_pengeluaran' => $item->id_pengeluaran]);
+
+            if (!$deleted) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to delete one or more items'
+                ])->setStatusCode(500);
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data deleted successfully'
+        ]);
+    }
 }

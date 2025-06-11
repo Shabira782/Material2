@@ -198,12 +198,15 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('detailpemesanan/(:any)/(:any)', 'PemesananController::detailPemesanan/$1/$2');
     $routes->get('selectClusterWarehouse/(:any)', 'PemesananController::selectClusterWarehouse/$1');
     $routes->get('selectClusterWarehouse2/(:any)/(:any)/(:any)', 'PemesananController::selectClusterWarehouse2/$1/$2/$3');
+    $routes->post('warehouse/saveSelectCluster', 'WarehouseController::saveSelectCluster');
+    $routes->post('warehouse/deleteSelectCluster', 'WarehouseController::deleteSelectCluster');
     $routes->post('saveUsage', 'PemesananController::saveUsage');
     $routes->get('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('pengiriman_area', 'PemesananController::pengirimanArea');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
+    $routes->get('pengirimanArea/(:any)', 'PemesananController::pengirimanArea2/$1');
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');
