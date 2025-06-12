@@ -344,20 +344,19 @@
             console.log(dataObject);
 
             if (this.checked) {
-                // Tambahkan ke array selectedData jika belum ada
-                if (!selectedData.some(item => item.id_total_pemesanan === idTotalPesanan)) {
+                // dedupe berdasarkan id_stock
+                if (!selectedData.some(item => item.id_stock === idStock)) {
                     selectedData.push(dataObject);
                 }
-                // Hapus dari deletedData jika ada
-                deletedData = deletedData.filter(item => item.id_total_pemesanan !== idTotalPesanan);
+                deletedData = deletedData.filter(item => item.id_stock !== idStock);
             } else {
-                // Tambahkan ke array deletedData jika belum ada
-                if (!deletedData.some(item => item.id_total_pemesanan === idTotalPesanan)) {
+                if (!deletedData.some(item => item.id_stock === idStock)) {
                     deletedData.push(dataObject);
                 }
-                // Hapus dari selectedData jika ada
-                selectedData = selectedData.filter(item => item.id_total_pemesanan !== idTotalPesanan);
+                selectedData = selectedData.filter(item => item.id_stock !== idStock);
             }
+            console.log('selectedData', selectedData);
+            console.log('deletedData', deletedData);
         });
     });
 
