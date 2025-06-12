@@ -126,9 +126,12 @@
                                                 <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
                                                 <td>
                                                     <!-- Modal buttons -->
-                                                    <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
+                                                    <a href="<?= base_url($role . '/retur/detailRetur/' . $row['id_retur']) ?>" class="btn btn-info">
+                                                        <i class="fas fa-eye"></i> Detail
+                                                    </a>
+                                                    <!-- <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
                                                         <i class="fas fa-check"></i> Accept
-                                                    </button>
+                                                    </button> -->
                                                     <button type="button" class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#rejectModal<?= $row['id_retur'] ?>">
                                                         <i class="fas fa-times"></i> Reject
                                                     </button>

@@ -12,8 +12,7 @@ use App\Models\PemasukanModel;
 use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
 use App\Models\ScheduleCelupModel;
-
-
+use App\Models\ClusterModel;
 
 class ReturController extends BaseController
 {
@@ -29,6 +28,7 @@ class ReturController extends BaseController
     protected $outCelupModel;
     protected $kategoriReturModel;
     protected $scheduleCelupModel;
+    protected $clusterModel;
 
 
     public function __construct()
@@ -41,6 +41,7 @@ class ReturController extends BaseController
         $this->outCelupModel = new OutCelupModel();
         $this->kategoriReturModel = new KategoriReturModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
+        $this->clusterModel = new ClusterModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -224,5 +225,24 @@ class ReturController extends BaseController
         }
 
         return $this->response->setJSON($data);
+    }
+
+    public function detailRetur($id)
+    {
+        $detailRetur = $this->returModel->getDetailRetur($id);
+        $cluster = $this->clusterModel->getDataCluster();
+        // dd($cluster);
+        if (!$detailRetur) {
+            return redirect()->to(base_url(session()->get('role') . '/retur'));
+        }
+        // dd($detailRetur);
+        $data = [
+            'role' => $this->role,
+            'active' => $this->active,
+            'title' => "Detail Retur",
+            'detailRetur' => $detailRetur,
+            'cluster' => $cluster
+        ];
+        return view($this->role . '/retur/detail-retur', $data);
     }
 }

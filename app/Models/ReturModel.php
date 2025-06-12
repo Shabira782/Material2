@@ -260,4 +260,14 @@ class ReturModel extends Model
 
         return $this->findAll();
     }
+
+    public function getDetailRetur($id)
+    {
+        return $this->select('retur.*, master_material.jenis, material.loss')
+            ->join('master_material', 'master_material.item_type = retur.item_type', 'left')
+            ->join('material', 'material.item_type = retur.item_type AND material.kode_warna = retur.kode_warna', 'left')
+            ->where('retur.id_retur', $id)
+            ->get()
+            ->getRowArray();
+    }
 }

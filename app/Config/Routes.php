@@ -126,6 +126,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
 
+
     $routes->get('getItemTypeByModel/(:any)', 'WarehouseController::getItemTypeByModel/$1');
     $routes->get('getKodeWarnaByModelAndItemType', 'WarehouseController::getKodeWarna');
     $routes->get('getWarnaDanLot', 'WarehouseController::getWarnaDanLot');
@@ -234,13 +235,15 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     //Retur
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
-    $routes->post('retur/reject', 'ReturController::reject');
+    $routes->post('retur/approve', 'ReturController::approve');
+    $routes->get('retur/detailRetur/(:num)', 'ReturController::detailRetur/$1');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
     $routes->get('retur/detailBarcodeRetur/(:any)', 'ReturController::detailBarcodeRetur/$1');
     $routes->get('retur/generateBarcodeRetur/(:any)', 'PdfController::generateBarcodeRetur/$1');
     $routes->get('retur/reportReturArea', 'ReturController::reportReturArea');
     $routes->get('retur/filterReturArea', 'ReturController::filterReturArea');
     $routes->get('retur/exportReturArea', 'ExcelController::exportReturArea');
+    $routes->post('retur/saveRetur', 'ReturController::saveRetur');
     // tambahan waktu
     $routes->get('pemesanan/requestAdditionalTime', 'PemesananController::requestAdditionalTime');
     $routes->get('pemesanan/getCountStatusRequest', 'PemesananController::getCountStatusRequest');
