@@ -1,184 +1,238 @@
 <?php $this->extend($role . '/warehouse/header'); ?>
 <?php $this->section('content'); ?>
+
 <div class="container-fluid py-4">
-    <?php if (session()->getFlashdata('success')) : ?>
-        <script>
-            $(document).ready(function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: '<?= session()->getFlashdata('success') ?>',
-                });
-            });
-        </script>
+
+    <!-- Flash Messages -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php elseif (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     <?php endif; ?>
 
-    <?php if (session()->getFlashdata('error')) : ?>
-        <script>
-            $(document).ready(function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: '<?= session()->getFlashdata('error') ?>',
-                });
-            });
-        </script>
-    <?php endif; ?>
     <div class="row">
-        <div class="col-xl-12 col-sm-12 mb-xl-0 mb-4 mt-2">
+        <!-- Header Card -->
+        <div class="col-xl-12 col-sm-12 mb-4">
             <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5>
-                            Pengriman Area
-                        </h5>
-                        <div class="d-flex gap-2">
-                            <button class="btn bg-gradient-info" data-bs-toggle="modal" data-bs-target="#inputManual">Input</button>
-                            <form action="<?= base_url($role . '/reset_pengeluaran') ?>" method="post">
-                                <button type="submit" class="btn bg-gradient-secondary"><i class="fas fa-redo"></i> Reset Data</button>
-                            </form>
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold"><?= $title; ?></p>
+                            <h5 class="font-weight-bolder mb-0">
+                                Pemesanan Bahan Baku <?= $pengeluaran[0]['jenis']; ?> Area <?= $pengeluaran[0]['admin']; ?>
+                            </h5>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                <i class="ni ni-chart-bar-32 text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <form action="<?= base_url($role . '/pengeluaran_jalur') ?>" method="post">
-                                <div class="form-group">
+                </div>
+            </div>
+        </div>
+
+        <!-- List Pemesanan -->
+        <div class="col-12">
+            <div class="card-body px-0 pt-0 pb-2">
+                <div class="row">
+                    <?php $no = 1; ?>
+                    <?php foreach ($pengeluaran as $row): ?>
+                        <div class="col-12 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 mb-2">
+                                        NO <?= $no++; ?>
+                                    </h6>
                                     <div class="row">
-                                        <div class="col-3">
-                                            <label for="barcode" class="form-control-label">No Model</label>
-                                            <input class="form-control" type="text" name="no_model" id="no_model" value="<?= $data[0]['no_model'] ?>">
+                                        <div class="col-md-4 mb-2">
+                                            <p><strong>NO MODEL:</strong> <?= $row['no_model']; ?></p>
+                                            <p><strong>FU:</strong> <?= $row['foll_up']; ?></p>
+                                            <p><strong>AREA:</strong> <?= $row['admin']; ?></p>
+                                            <p><strong>TGL PAKAI:</strong> <?= date('d-m-Y', strtotime($row['tgl_pakai'])); ?></p>
                                         </div>
-                                        <div class="col-3">
-                                            <label for="barcode" class="form-control-label">Item Type</label>
-                                            <input class="form-control" type="text" name="item_type" id="item_type" value="<?= $data[0]['item_type'] ?>">
+                                        <div class="col-md-4 mb-2">
+                                            <p><strong>ITEM TYPE:</strong> <?= $row['item_type']; ?></p>
+                                            <p><strong>WARNA:</strong> <?= $row['color']; ?></p>
+                                            <p><strong>KODE WARNA:</strong> <?= $row['kode_warna']; ?></p>
+                                            <p><strong>SISA JATAH:</strong> - KG</p>
                                         </div>
-                                        <div class="col-3">
-                                            <label for="barcode" class="form-control-label">Kode Warna</label>
-                                            <input class="form-control" type="text" name="kode_warna" id="kode_warna" value="<?= $data[0]['kode_warna'] ?>">
-                                        </div>
-                                        <div class="col-3">
-                                            <label for="barcode" class="form-control-label">Warna</label>
-                                            <input class="form-control" type="text" name="color" id="color" value="<?= $data[0]['color'] ?>">
+                                        <div class="col-md-4 mb-2">
+                                            <p><strong>TTL PESAN (KG):</strong> <?= number_format($row['ttl_kg'], 0, ',', '.'); ?> KG</p>
+                                            <p><strong>CONES PESAN:</strong> <?= $row['ttl_cns']; ?> CONES</p>
+                                            <p><strong>KETERANGAN:</strong> <?= $row['keterangan'] ?? "-"; ?></p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-
-                                </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-
+                    <?php endforeach; ?>
                 </div>
-
             </div>
-            <div class="card my-1">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="d-flex justify-content-between">
-                            <h6>
+        </div>
 
-                            </h6>
-                        </div>
+        <!-- Form Pengeluaran -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>Form Pengeluaran Bahan Baku</h6>
+                </div>
+                <div class="card-body px-3 pt-3 pb-2">
+                    <form action="<?= base_url('gbn/warehouse/pengeluaran2'); ?>" method="post">
+                        <?= csrf_field() ?>
 
-                    </div>
-                    <form action="<?= base_url($role . '/proses_pengeluaran_jalur') ?>" method="post">
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 col-sm-12">
-                                <div class="table-responsive">
-                                    <table id="inTable" class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th width=30 class="text-center"><input type="checkbox" name="select_all" id="select_all" value=""></th>
-                                                <th class="text-center"><i class="fas fa-cart-shopping"></i></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $no = 1;
-                                            $today = date('d-M-Y');
-                                            $formated = trim(date('Y-m-d'));
+                        <!-- Hidden Inputs -->
+                        <input type="hidden" name="id_pengeluaran" value="<?= $pengeluaran[0]['id_pengeluaran'] ?>">
+                        <input type="hidden" name="jenis" value="<?= $pengeluaran[0]['jenis'] ?>">
+                        <input type="hidden" name="no_model" value="<?= $pengeluaran[0]['no_model'] ?>">
+                        <input type="hidden" name="foll_up" value="<?= $pengeluaran[0]['foll_up'] ?>">
+                        <input type="hidden" name="admin" value="<?= $pengeluaran[0]['admin'] ?>">
+                        <input type="hidden" name="tgl_pakai" value="<?= $pengeluaran[0]['tgl_pakai'] ?>">
 
-                                            // foreach ($dataOutJalur as $data) {
-                                            ?>
-                                            <tr>
-                                                <td align="center"><input type="checkbox" name="checked_id[]" class="checkbox" value="<?= $no - 1 ?>"> <?= $no++ ?></td>
-                                                <td>
-                                                    <div class="form-group d-flex justify-content-end">
-                                                        <label for="tgl_keluar">Tanggal Keluar : <?= $today ?></label>
-                                                        <input type="date" class="form-control" name="tgl_keluar[]" value="<?= $formated ?>" hidden>
-                                                    </div>
-                                                    <div class="form-group d-flex justify-content-center">
-                                                        <label for="nama_cluster"><?= $data[0]['nama_cluster'] ?></label>
-                                                        <input type="text" class="form-control" name="nama_cluster[]" value="<?= $data[0]['nama_cluster'] ?>" hidden>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="tgl">Model : </label>
-                                                        <input type="text" class="form-control" name="no_model[]" value="<?= $data[0]['no_model'] ?>" readonly>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label for="">Kode Benang:</label>
-                                                                <input type="text" class="form-control" name="item_type[]" value="<?= $data[0]['item_type'] ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label for="">Kode Warna:</label>
-                                                                <input type="text" class="form-control" name="kode_warna[]" value="<?= $data[0]['kode_warna'] ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label for=""> Warna:</label>
-                                                                <input type="text" class="form-control" name="warna[]" value="<?= $data[0]['color'] ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label for=""> Lot:</label>
-                                                                <input type="text" class="form-control" name="lot_out[]" value="<?= $data[0]['lot_stock'] ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label for=""> Kgs Keluar:</label>
-                                                                <input type="number" class="form-control" name="kgs_keluar[]" value="<?= $data[0]['kg_stock'] ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label for="">Cones Keluar:</label>
-                                                                <input type="number" class="form-control" name="cns_keluar[]" value="<?= $data[0]['cns_stock'] ?>" readonly>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group d-flex justify-content-end">
-                                                        <button type="button" class="btn btn-danger removeRow btn-hapus">
-                                                            <i class=" fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <?php
-                                            // }
-                                            ?>
-                                        </tbody>
-                                    </table>
+                        <!-- Validation Errors -->
+                        <?php if (isset($validation)) : ?>
+                            <div class="alert alert-danger">
+                                <?= $validation->listErrors() ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Baris Form Input Dinamis -->
+                        <?php foreach ($pengeluaran as $i => $data): ?>
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <label for="palet_<?= $i ?>">Palet</label>
+                                    <input
+                                        type="text"
+                                        id="palet_<?= $i ?>"
+                                        class="form-control"
+                                        name="palet[]"
+                                        value="<?= $data['nama_cluster'] ?>"
+                                        readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <label>KG Stok</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="kgs_stok[]"
+                                        value="<?= $data['kg_stock'] ?>"
+                                        readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>KG Kirim</label>
+                                    <input
+                                        type="number"
+                                        class="form-control kg-kirim"
+                                        name="kg_kirim[]"
+                                        value="0"
+                                        required>
+                                </div>
+                                <div class="col-md-1">
+                                    <label>Cns Stok</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="cns_stok[]"
+                                        value="<?= $data['cns_stock'] ?>"
+                                        readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Cns Kirim</label>
+                                    <input
+                                        type="number"
+                                        class="form-control cns-kirim"
+                                        name="cns_kirim[]"
+                                        value="0"
+                                        required>
+                                </div>
+                                <div class="col-md-1">
+                                    <label>Krg Stok</label>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        name="krg_stok[]"
+                                        value="<?= $data['krg_stock'] ?>"
+                                        readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <label>Krg Kirim</label>
+                                    <input
+                                        type="number"
+                                        class="form-control krg-kirim"
+                                        name="krg_kirim[]"
+                                        value="0"
+                                        required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Lot</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="lot[]"
+                                        value="<?= $data['lot_stock'] ?>"
+                                        required>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center gap-4 mt-2">
-                                <button type="submit" class="btn bg-gradient-info w-100">Out Data</button>
+                        <?php endforeach; ?>
+
+                        <!-- Total Summary -->
+                        <div class="row mt-3 text-center">
+                            <div class="col-md-4">
+                                <strong>Total KG Kirim:</strong>
+                                <span id="total-kg-kirim">0</span> KG
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Total Cones Kirim:</strong>
+                                <span id="total-cns-kirim">0</span> CONES
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Total Karung Kirim:</strong>
+                                <span id="total-krg-kirim">0</span> KARUNG
                             </div>
                         </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn bg-gradient-info w-100 mt-3">
+                            Simpan
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
+
     </div>
-    <?php $this->endSection(); ?>
+</div>
+
+<!-- JavaScript Total Calculator -->
+<script>
+    function hitungTotal(selector, outputId) {
+        let total = 0;
+        document.querySelectorAll(selector).forEach(function(input) {
+            total += parseFloat(input.value) || 0;
+        });
+        document.getElementById(outputId).textContent = total.toLocaleString();
+    }
+
+    function updateAllTotals() {
+        hitungTotal('.kg-kirim', 'total-kg-kirim');
+        hitungTotal('.cns-kirim', 'total-cns-kirim');
+        hitungTotal('.krg-kirim', 'total-krg-kirim');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAllTotals();
+        document.querySelectorAll('.kg-kirim, .cns-kirim, .krg-kirim').forEach(function(input) {
+            input.addEventListener('input', updateAllTotals);
+        });
+    });
+</script>
+
+<?php $this->endSection(); ?>

@@ -732,7 +732,7 @@ class PemesananController extends BaseController
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'data' => $pengeluaran
+            'pengeluaran' => $pengeluaran
         ];
         return view($this->role . '/warehouse/form-pengeluaran2', $data);
     }

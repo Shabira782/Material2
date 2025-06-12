@@ -2848,6 +2848,7 @@ class WarehouseController extends BaseController
         // Akses 'selectedData' sebagai array objek
         $selectedData = $data->selectedData;
 
+        $insertData = [];
         foreach ($selectedData as $item) {
             // Validasi data setiap item
             if (!isset($item->id_total_pemesanan, $item->area_out, $item->lot_out, $item->nama_cluster)) {
@@ -2857,8 +2858,7 @@ class WarehouseController extends BaseController
                 ])->setStatusCode(400);
             }
 
-            // Simpan setiap item ke database
-            $this->pengeluaranModel->save([
+            $insertData[] = [
                 'id_total_pemesanan' => $item->id_total_pemesanan,
                 'area_out' => $item->area_out,
                 'lot_out' => $item->lot_out,
@@ -2866,7 +2866,11 @@ class WarehouseController extends BaseController
                 'status' => "Pengeluaran Jalur",
                 'admin' => session('username'),
                 'created_at' => date("Y-m-d H:i:s")
-            ]);
+            ];
+        }
+
+        if (!empty($insertData)) {
+            $this->pengeluaranModel->insertBatch($insertData);
         }
 
         return $this->response->setJSON([
