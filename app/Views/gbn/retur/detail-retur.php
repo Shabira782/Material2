@@ -185,16 +185,16 @@
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control kapasitas" name="kapasitas[0]" required readonly>
+                                                    <input type="number" class="form-control kapasitas" name="kapasitas[0]" required readonly>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control kgs" name="kgs[0]" required>
+                                                    <input type="number" class="form-control kgs" name="kgs[0]" required>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control cones" name="cones[0]" required>
+                                                    <input type="number" class="form-control cones" name="cones[0]" required>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control krg" name="krg[0]" required>
+                                                    <input type="number" class="form-control krg" name="krg[0]" required>
                                                 </td>
                                                 <td>
                                                     <input type="text" class="form-control lot" name="lot" value="<?= $detailRetur['lot_retur'] ?? '' ?>" required>
@@ -276,6 +276,35 @@
         });
 
     });
+
+    function resetForm() {
+        const tbody = document.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        console.log(tbody);
+        // Hapus semua baris kecuali baris pertama
+        rows.forEach((row, index) => {
+            if (index > 0) {
+                row.remove();
+            }
+        });
+
+        // Reset isi baris pertama
+        const firstRow = tbody.querySelector('tr');
+        if (firstRow) {
+            // Reset dropdown ke "Pilih Cluster"
+            const select = firstRow.querySelector('select.nama_cluster');
+            if (select) {
+                select.selectedIndex = 0;
+            }
+
+            // Reset semua input kecuali readonly (seperti kapasitas)
+            const inputs = firstRow.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.classList.contains('lot')) return;
+                input.value = '';
+            });
+        }
+    }
 </script>
 
 <script>
