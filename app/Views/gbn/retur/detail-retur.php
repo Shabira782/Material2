@@ -38,6 +38,7 @@
                 <div class="card">
                     <div class="card-body">
                         <form id="returForm" method="POST" action="<?= base_url($role . '/retur/saveRetur') ?>">
+                            <input type="hidden" name="id_retur" value="<?= $detailRetur['id_retur'] ?>">
                             <!-- Informasi Dasar -->
                             <div class="section-title">
                                 <i class="fas fa-info-circle me-2"></i>Detail Retur
@@ -65,7 +66,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label for="loss" class="form-label">Loss Retur</label>
-                                    <input type="text" class="form-control" id="loss" name="loss" value="<?= $detailRetur['loss'] ?>" readonly>
+                                    <input type="text" class="form-control" id="loss" name="loss" value="<?= $detailRetur['loss'] . '%' ?>" readonly>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -145,7 +146,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="keterangan_gbn" class="form-label">Keterangan GBN</label>
-                                    <textarea class="form-control" id="keterangan_gbn" name="keterangan_gbn" rows="3" readonly><?= $detailRetur['keterangan_gbn'] ?? '' ?></textarea>
+                                    <textarea class="form-control" id="keterangan_gbn" name="keterangan_gbn" rows="3" required></textarea>
                                 </div>
                             </div>
 
@@ -184,19 +185,19 @@
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control kapasitas" name="kapasitas[0]" required>
+                                                    <input type="number" class="form-control kapasitas" name="kapasitas[0]" required readonly>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control kgs" name="kgs[0]" required>
+                                                    <input type="number" class="form-control kgs" name="kgs[0]" required>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control cones" name="cones[0]" required>
+                                                    <input type="number" class="form-control cones" name="cones[0]" required>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control krg" name="krg[0]" required>
+                                                    <input type="number" class="form-control krg" name="krg[0]" required>
                                                 </td>
                                                 <td>
-                                                    <input type="text" class="form-control lot" name="lot[0]" value="<?= $detailRetur['lot_retur'] ?? '' ?>" required>
+                                                    <input type="text" class="form-control lot" name="lot" value="<?= $detailRetur['lot_retur'] ?? '' ?>" required>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -215,7 +216,7 @@
                                                 <td></td>
                                                 <td><input type="float" class="form-control text-center" id="total_kgs" name="total_kgs" placeholder="0" readonly></td>
                                                 <td><input type="float" class="form-control text-center" id="total_cones" name="total_cones" placeholder="0" readonly></td>
-                                                <td><input type="float" class="form-control text-center" id="total_lot" name="total_lot" placeholder="0" readonly></td>
+                                                <td><input type="float" class="form-control text-center" id="total_krg" name="total_krg" placeholder="0" readonly></td>
                                                 <td></td>
                                                 <td></td>
                                             </tr>
@@ -232,7 +233,7 @@
                                             <i class="fas fa-undo me-1"></i>Reset
                                         </button>
                                         <button type="submit" class="btn btn-dark">
-                                            <i class="fas fa-save me-1"></i>Simpan Data
+                                            <i class="fas fa-check me-1"></i>Accept Retur
                                         </button>
                                     </div>
                                 </div>
@@ -275,6 +276,35 @@
         });
 
     });
+
+    function resetForm() {
+        const tbody = document.querySelector('tbody');
+        const rows = tbody.querySelectorAll('tr');
+        console.log(tbody);
+        // Hapus semua baris kecuali baris pertama
+        rows.forEach((row, index) => {
+            if (index > 0) {
+                row.remove();
+            }
+        });
+
+        // Reset isi baris pertama
+        const firstRow = tbody.querySelector('tr');
+        if (firstRow) {
+            // Reset dropdown ke "Pilih Cluster"
+            const select = firstRow.querySelector('select.nama_cluster');
+            if (select) {
+                select.selectedIndex = 0;
+            }
+
+            // Reset semua input kecuali readonly (seperti kapasitas)
+            const inputs = firstRow.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.classList.contains('lot')) return;
+                input.value = '';
+            });
+        }
+    }
 </script>
 
 <script>
@@ -308,8 +338,8 @@
                     <td><input type="number" class="form-control kapasitas" name="kapasitas[${rowCount}]" required readonly></td>
                     <td><input type="number" step="0.01" class="form-control kgs" name="kgs[${rowCount}]" required></td>
                     <td><input type="number" class="form-control cones" name="cones[${rowCount}]" required></td>
-                    <td><input type="number" class="form-control karung" name="karung[${rowCount}]" required></td>
-                    <td><input type="text" class="form-control lot_retur" name="lot_retur[${rowCount}]" value="<?= $detailRetur['lot_retur'] ?>" required></td>
+                    <td><input type="number" class="form-control krg" name="krg[${rowCount}]" required></td>
+                    <td><input type="text" class="form-control lot" name="lot" value="<?= $detailRetur['lot_retur'] ?>" required></td>
                     <td class="text-center">
                         <button type="button" class="btn btn-danger removeRow"><i class="fas fa-trash"></i></button>
                     </td>
@@ -360,7 +390,7 @@
         // Tampilkan hasil di footer
         document.getElementById('total_kgs').value = totalKgs.toFixed(2);
         document.getElementById('total_cones').value = totalCones;
-        document.getElementById('total_lot').value = totalKrg;
+        document.getElementById('total_krg').value = totalKrg;
     }
 </script>
 

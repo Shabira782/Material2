@@ -127,7 +127,7 @@
                                                 <td>
                                                     <!-- Modal buttons -->
                                                     <a href="<?= base_url($role . '/retur/detailRetur/' . $row['id_retur']) ?>" class="btn btn-info">
-                                                        <i class="fas fa-eye"></i> Detail
+                                                        <i class="fas fa-check"></i> Accept
                                                     </a>
                                                     <!-- <button type="button" class="btn btn-info " data-bs-toggle="modal" data-bs-target="#acceptModal<?= $row['id_retur'] ?>">
                                                         <i class="fas fa-check"></i> Accept

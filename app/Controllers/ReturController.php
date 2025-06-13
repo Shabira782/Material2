@@ -13,6 +13,7 @@ use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
 use App\Models\ScheduleCelupModel;
 use App\Models\ClusterModel;
+use App\Models\StockModel;
 
 class ReturController extends BaseController
 {
@@ -29,7 +30,7 @@ class ReturController extends BaseController
     protected $kategoriReturModel;
     protected $scheduleCelupModel;
     protected $clusterModel;
-
+    protected $stockModel;
 
     public function __construct()
     {
@@ -42,6 +43,7 @@ class ReturController extends BaseController
         $this->kategoriReturModel = new KategoriReturModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
         $this->clusterModel = new ClusterModel();
+        $this->stockModel = new StockModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -231,11 +233,11 @@ class ReturController extends BaseController
     {
         $detailRetur = $this->returModel->getDetailRetur($id);
         $cluster = $this->clusterModel->getDataCluster();
-        // dd($cluster);
+
         if (!$detailRetur) {
             return redirect()->to(base_url(session()->get('role') . '/retur'));
         }
-        // dd($detailRetur);
+
         $data = [
             'role' => $this->role,
             'active' => $this->active,
@@ -244,5 +246,134 @@ class ReturController extends BaseController
             'cluster' => $cluster
         ];
         return view($this->role . '/retur/detail-retur', $data);
+    }
+
+    public function saveRetur()
+    {
+        $getData = $this->request->getPost();
+        $data = [];
+        $createdAt = date('Y-m-d H:i:s');
+        $user     = session()->get('username');
+
+        $this->returModel->update($getData['id_retur'], [
+            'keterangan_gbn' => 'Approve: ' . $getData['keterangan_gbn'],
+            'waktu_acc_retur' => $createdAt,
+            'admin' => $user,
+            'updated_at' => $createdAt,
+        ]);
+
+        // 1) Siapkan data untuk out_celup
+        if (isset($getData['nama_cluster']) && count($getData['nama_cluster']) >= 2) {
+            $total = count($getData['nama_cluster']);
+            for ($i = 0; $i < $total; $i++) {
+                $data[] = [
+                    'id_retur'     => $getData['id_retur'],
+                    'no_model'     => $getData['no_model'],
+                    'kgs_kirim'    => $getData['kgs'][$i],
+                    'cones_kirim'  => $getData['cones'][$i],
+                    'karung_kirim' => $getData['krg'][$i],
+                    'lot_kirim'    => $getData['lot'],
+                    'admin'        => $user,
+                    'l_m_d'        => '',
+                    'created_at'   => $createdAt,
+                    'updated_at'   => $createdAt,
+                ];
+            }
+        } else {
+            $data[] = [
+                'id_retur'     => $getData['id_retur'],
+                'no_model'     => $getData['no_model'],
+                'kgs_kirim'    => is_array($getData['kgs']) ? $getData['kgs'][0] : $getData['kgs'],
+                'cones_kirim'  => is_array($getData['cones']) ? $getData['cones'][0] : $getData['cones'],
+                'karung_kirim' => is_array($getData['krg']) ? $getData['krg'][0] : $getData['krg'],
+                'lot_kirim'    => is_array($getData['lot']) ? $getData['lot'][0] : $getData['lot'],
+                'admin'        => $user,
+                'l_m_d'        => '',
+                'created_at'   => $createdAt,
+                'updated_at'   => $createdAt,
+            ];
+        }
+
+        // 2) Simpan ke out_celup
+        $insert = count($data) > 1
+            ? $this->outCelupModel->insertBatch($data)
+            : $this->outCelupModel->insert($data[0]);
+
+        if (! $insert) {
+            session()->setFlashdata('error', 'Gagal menyimpan data retur.');
+            return redirect()->to(base_url($this->role . '/retur'));
+        }
+
+        // 3) Ambil kembali baris yang baru
+        $inserted = $this->outCelupModel
+            ->where('id_retur', $getData['id_retur'])
+            ->where('no_model', $getData['no_model'])
+            ->where('created_at', $createdAt)
+            ->findAll();
+
+        $tglMasuk       = date('Y-m-d');
+
+        foreach ($inserted as $idx => $row) {
+            // 4) Simpan/Update ke stock
+            $cluster = $getData['nama_cluster'][$idx] ?? $getData['nama_cluster'][0];
+            $stock   = $this->stockModel
+                ->where('nama_cluster', $cluster)
+                ->where('no_model', $row['no_model'])
+                ->where('item_type', $getData['item_type'])
+                ->where('kode_warna', $getData['kode_warna'])
+                ->where('warna', $getData['warna'])
+                ->first();
+
+            $inKgs   = $row['kgs_kirim'];
+            $inCns   = $row['cones_kirim'];
+            $inKrg   = $row['karung_kirim'];
+            $lotNew  = $row['lot_kirim'];
+
+            if ($stock) {
+                // Update stok
+                $this->stockModel->update($stock['id_stock'], [
+                    'kgs_stock_awal' => $stock['kgs_stock_awal'] + $inKgs,
+                    'cns_stock_awal' => $stock['cns_stock_awal'] + $inCns,
+                    'krg_stock_awal' => $stock['krg_stock_awal'] + $inKrg,
+                    'lot_awal'       => $lotNew,
+                    'updated_at'     => $createdAt,
+                ]);
+                $idStock = $stock['id_stock'];
+            } else {
+                // Insert baru
+                $idStock = $this->stockModel->insert([
+                    'no_model'        => $row['no_model'],
+                    'item_type'       => $getData['item_type'],
+                    'kode_warna'      => $getData['kode_warna'],
+                    'warna'           => $getData['warna'],
+                    'kgs_stock_awal'  => $inKgs,
+                    'cns_stock_awal'  => $inCns,
+                    'krg_stock_awal'  => $inKrg,
+                    'lot_awal'        => $lotNew,
+                    'kgs_in_out'      => 0,
+                    'cns_in_out'      => 0,
+                    'krg_in_out'      => 0,
+                    'lot_stock'       => $lotNew,
+                    'nama_cluster'    => $cluster,
+                    'admin'           => $user,
+                    'created_at'      => $createdAt,
+                    'updated_at'      => $createdAt,
+                ]);
+            }
+            // 5) Simpan ke pemasukan
+            $this->pemasukanModel->insert([
+                'id_out_celup' => $row['id_out_celup'],
+                'tgl_masuk'    => $tglMasuk,
+                'nama_cluster' => $getData['nama_cluster'][$idx] ?? $getData['nama_cluster'][0],
+                'out_jalur'    => '0',
+                'admin'        => $user,
+                'id_stock'     => $idStock,
+                'created_at'   => $createdAt,
+                'updated_at'   => $createdAt,
+            ]);
+        }
+
+        session()->setFlashdata('success', 'Data retur berhasil disimpan.');
+        return redirect()->to(base_url($this->role . '/retur'));
     }
 }
