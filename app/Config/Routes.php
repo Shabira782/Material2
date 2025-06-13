@@ -236,7 +236,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     //Retur
     $routes->get('retur', 'ReturController::index');
     $routes->post('retur/approve', 'ReturController::approve');
-    $routes->post('retur/approve', 'ReturController::approve');
+    $routes->post('retur/reject', 'ReturController::reject2');
     $routes->get('retur/detailRetur/(:num)', 'ReturController::detailRetur/$1');
     $routes->get('retur/listBarcodeRetur', 'ReturController::listBarcodeRetur');
     $routes->get('retur/detailBarcodeRetur/(:any)', 'ReturController::detailBarcodeRetur/$1');
