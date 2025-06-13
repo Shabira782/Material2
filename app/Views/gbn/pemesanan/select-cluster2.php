@@ -252,10 +252,13 @@
                             <th class="text-center text-secondary text-sm font-weight-bolder">Keterangan Area</th>
                             <th class="text-center text-secondary text-sm font-weight-bolder">Pilih</th>
                             <th class="text-center text-secondary text-sm font-weight-bolder">Cluster</th>
+                            <th class="text-center text-secondary text-sm font-weight-bolder">Lot Stock</th>
+                            <th class="text-center text-secondary text-sm font-weight-bolder">Kg Stock Awal</th>
+                            <th class="text-center text-secondary text-sm font-weight-bolder">Cns Stock Awal</th>
+                            <th class="text-center text-secondary text-sm font-weight-bolder">Krg Stock Awal</th>
                             <th class="text-center text-secondary text-sm font-weight-bolder">Kg Stock</th>
                             <th class="text-center text-secondary text-sm font-weight-bolder">Cns Stock</th>
                             <th class="text-center text-secondary text-sm font-weight-bolder">Krg Stock</th>
-                            <th class="text-center text-secondary text-sm font-weight-bolder">Lot Stock</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -293,19 +296,25 @@
                                 <td class="text-center align-middle"><?= $lot; ?></td>
                                 <td class="text-center align-middle"><?= $keterangan; ?></td>
                                 <td class="text-center align-middle">
-                                    <?php if (!empty($id['nama_cluster'])) { ?>
-                                        <input type="checkbox" class="checkbox-new checkbox"
+                                    <?php if (!empty($id['nama_cluster'])): ?>
+                                        <input
+                                            type="checkbox"
+                                            class="checkbox-new checkbox"
                                             data-id-total-pesanan="<?= $id['id_total_pemesanan']; ?>"
                                             data-id-stock="<?= $id['id_stock']; ?>"
                                             data-id-pengeluaran="<?= $id['id_pengeluaran']; ?>"
-                                            <?= !empty($id['id_pengeluaran']) ? 'checked' : ''; ?>>
-                                    <?php } ?>
+                                            <?= !empty($id['id_pengeluaran']) ? 'checked' : ''; ?>
+                                            <?= (!empty($id['kgs_out']) && $id['kgs_out'] > 0) ? 'disabled' : ''; ?>>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-center align-middle"><?= $id['nama_cluster'] ?></td>
+                                <td class="text-center align-middle"><?= $id['lot_stock'] ?></td>
                                 <td class="text-center align-middle"><?= $id['kg_stock'] ?></td>
                                 <td class="text-center align-middle"><?= $id['cns_stock'] ?></td>
                                 <td class="text-center align-middle"><?= $id['krg_stock'] ?></td>
-                                <td class="text-center align-middle"><?= $id['lot_stock'] ?></td>
+                                <td class="text-center align-middle"><?= $id['kgs_stock_awal'] ?></td>
+                                <td class="text-center align-middle"><?= $id['cns_stock_awal'] ?></td>
+                                <td class="text-center align-middle"><?= $id['krg_stock_awal'] ?></td>
                             </tr>
                         <?php
                         } ?>
@@ -324,7 +333,7 @@
     document.querySelectorAll('.checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const parentRow = this.closest('tr');
-            const lot = parentRow.querySelector('td:nth-child(15)').innerText.trim();
+            const lot = parentRow.querySelector('td:nth-child(12)').innerText.trim();
             const cluster = parentRow.querySelector('td:nth-child(11)').innerText.trim();
             const idTotalPesanan = this.dataset.idTotalPesanan;
             const idStock = this.dataset.idStock;

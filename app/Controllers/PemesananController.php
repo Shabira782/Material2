@@ -736,4 +736,63 @@ class PemesananController extends BaseController
         ];
         return view($this->role . '/warehouse/form-pengeluaran2', $data);
     }
+    public function savePengirimanArea2()
+    {
+        $data = $this->request->getPost();
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            foreach ($data['id_pengeluaran'] as $key => $id) {
+                // Ambil stok awal dari database
+                $stock = $this->stockModel->find($data['id_stock'][$key]);
+
+                // Data yang akan diupdate pengeluaran
+                $updatePengeluaran = [
+                    'kgs_out'  => $data['kg_kirim'][$key],
+                    'cns_out' => $data['cns_kirim'][$key],
+                    'krg_out' => $data['krg_kirim'][$key],
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                if (!$this->pengeluaranModel->update($id, $updatePengeluaran)) {
+                    throw new \Exception("Gagal memperbarui pengeluaran dengan ID: $id");
+                }
+
+                // Validasi stok awal dan lakukan pengurangan
+                if ($stock['kgs_stock_awal'] > 0) {
+                    $updateStok = [
+                        'kgs_stock_awal' => ($stock['kgs_stock_awal'] + $data['kg_kirim_before'][$key]) - $data['kg_kirim'][$key],
+                        'cns_stock_awal' => ($stock['cns_stock_awal'] + $data['cns_kirim_before'][$key]) - $data['cns_kirim'][$key],
+                        'krg_stock_awal' => ($stock['krg_stock_awal'] + $data['krg_kirim_before'][$key]) - $data['krg_kirim'][$key]
+                    ];
+                } else {
+                    $updateStok = [
+                        'kgs_in_out' => ($stock['kgs_in_out'] + $data['kg_kirim_before'][$key])  - $data['kg_kirim'][$key],
+                        'cns_in_out' => ($stock['cns_in_out'] + $data['cns_kirim_before'][$key]) - $data['cns_kirim'][$key],
+                        'krg_in_out' => ($stock['krg_in_out'] + $data['krg_kirim_before'][$key]) - $data['krg_kirim'][$key]
+                    ];
+                }
+                if (!$this->stockModel->update($data['id_stock'][$key], $updateStok)) {
+                    throw new \Exception("Gagal memperbarui stok untuk ID: {$data['id_stock'][$key]}");
+                }
+            }
+
+            // Commit transaksi jika semua berhasil
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                throw new \Exception("Transaksi gagal, rollback dilakukan.");
+            }
+            $db->transCommit();
+
+            return redirect()
+                ->to(base_url($this->role . '/detailpemesanan/' . $data['area_out'] . '/' . $data['jenis'] . '/' . $data['tgl_pakai']))
+                ->with('success', 'Data pengeluaran berhasil diperbarui.');
+        } catch (\Exception $e) {
+            $db->transRollback();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
+    }
 }

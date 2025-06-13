@@ -208,6 +208,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('hapus_pengiriman', 'PemesananController::hapusListPengiriman');
     $routes->post('proses_pengiriman', 'PemesananController::prosesPengirimanArea');
     $routes->get('pengirimanArea/(:any)', 'PemesananController::pengirimanArea2/$1');
+    $routes->post('savePengirimanArea', 'PemesananController::savePengirimanArea2');
     $routes->get('pemesanan/reportPemesananArea', 'PemesananController::reportPemesananArea');
     $routes->get('pemesanan/filterPemesananArea', 'PemesananController::filterPemesananArea');
     $routes->get('pemesanan/exportPemesananArea', 'ExcelController::excelPemesananArea');

@@ -654,11 +654,16 @@ class PemesananModel extends Model
             material.kode_warna, 
             material.color, 
             stock.nama_cluster,
-            stock.nama_cluster, (stock.kgs_stock_awal + stock.kgs_in_out) as kg_stock, 
-            (stock.cns_stock_awal + stock.cns_in_out) as cns_stock,
-            (stock.krg_stock_awal + stock.krg_in_out) as krg_stock,
+            stock.nama_cluster, 
+            stock.kgs_stock_awal,
+            stock.kgs_in_out as kg_stock, 
+            stock.cns_stock_awal,
+            stock.cns_in_out as cns_stock,
+            stock.krg_stock_awal,
+            stock.krg_in_out as krg_stock,
             GROUP_CONCAT(DISTINCT stock.lot_awal, stock.lot_stock) AS lot_stock,
-            pengeluaran.id_pengeluaran
+            pengeluaran.id_pengeluaran,
+            pengeluaran.kgs_out
         ');
 
         $builder->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left');
@@ -666,7 +671,7 @@ class PemesananModel extends Model
         $builder->join('master_material', 'master_material.item_type = material.item_type', 'left');
         $builder->join('master_order', 'master_order.id_order = material.id_order', 'left');
         $builder->join('stock', 'stock.item_type = material.item_type AND stock.kode_warna = material.kode_warna AND stock.warna = material.color AND master_order.no_model=stock.no_model', 'left');
-        $builder->join('pengeluaran', 'pengeluaran.id_total_pemesanan = total_pemesanan.id_total_pemesanan AND stock.nama_cluster=pengeluaran.nama_cluster AND lot_stock=pengeluaran.lot_out', 'left');
+        $builder->join('pengeluaran', 'pengeluaran.id_total_pemesanan = total_pemesanan.id_total_pemesanan AND stock.id_stock=pengeluaran.id_stock', 'left');
 
         $builder->where('pemesanan.admin', $area);
         $builder->where('master_material.jenis', $jenis);

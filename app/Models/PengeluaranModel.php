@@ -15,6 +15,8 @@ class PengeluaranModel extends Model
     protected $allowedFields    = [
         'id_pengeluaran',
         // 'id_out_celup',
+        'id_total_pemesanan',
+        'id_stock',
         'area_out',
         'tgl_out',
         'kgs_out',
@@ -23,7 +25,6 @@ class PengeluaranModel extends Model
         'lot_out',
         'nama_cluster',
         'status',
-        'id_total_pemesanan',
         'admin',
         'created_at',
         'updated_at',
@@ -36,7 +37,7 @@ class PengeluaranModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -200,12 +201,12 @@ class PengeluaranModel extends Model
         $builder->join('material', 'pemesanan.id_material = material.id_material', 'left');
         $builder->join('master_material', 'master_material.item_type = material.item_type', 'left');
         $builder->join('master_order', 'master_order.id_order = material.id_order', 'left');
-        $builder->join('stock', 'stock.item_type = material.item_type AND stock.kode_warna = material.kode_warna AND stock.warna = material.color AND master_order.no_model=stock.no_model AND stock.nama_cluster=pengeluaran.nama_cluster AND lot_stock=pengeluaran.lot_out', 'left');
+        $builder->join('stock', 'stock.item_type = material.item_type AND stock.kode_warna = material.kode_warna AND stock.warna = material.color AND master_order.no_model=stock.no_model AND stock.id_stock=pengeluaran.id_stock', 'left');
 
         $builder->where('total_pemesanan.id_total_pemesanan', $idTotalPemesanan);
         $builder->where('pemesanan.status_kirim', 'YA');
         $builder->groupBy('stock.id_stock, , total_pemesanan.id_total_pemesanan');
-        $builder->orderBy('pengeluaran.id_pengeluaran', 'ASC');
+        $builder->orderBy('pengeluaran.nama_cluster', 'ASC');
 
         return $builder->get()->getResultArray();
     }

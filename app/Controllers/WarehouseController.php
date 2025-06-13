@@ -2860,6 +2860,7 @@ class WarehouseController extends BaseController
 
             $insertData[] = [
                 'id_total_pemesanan' => $item->id_total_pemesanan,
+                'id_stock' => $item->id_stock,
                 'area_out' => $item->area_out,
                 'lot_out' => $item->lot_out,
                 'nama_cluster' => $item->nama_cluster,
