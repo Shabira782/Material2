@@ -231,8 +231,50 @@ class ReturController extends BaseController
 
     public function detailRetur($id)
     {
-        $detailRetur = $this->returModel->getDetailRetur($id);
-        $cluster = $this->clusterModel->getDataCluster();
+        function fetchApiData($url)
+        {
+            try {
+                $response = file_get_contents($url);
+                if ($response === false) {
+                    throw new \Exception("Error fetching data from $url");
+                }
+                $data = json_decode($response, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception("Invalid JSON response from $url");
+                }
+                return $data;
+            } catch (\Exception $e) {
+                error_log($e->getMessage());
+                return null;
+            }
+        }
+
+        $detailRetur    = $this->returModel->getDetailRetur($id);
+        $cluster        = $this->clusterModel->getDataCluster();
+
+        $area       = $detailRetur['area_retur'];
+        $no_model   = $detailRetur['no_model'];
+        $item_type  = $detailRetur['item_type'];
+        $kode_warna = $detailRetur['kode_warna'];
+        $warna      = $detailRetur['warna'];
+
+        // get komposisi, gw dan los
+        $getMu = $this->materialModel->getStyleSizeByBb($no_model, $item_type, $kode_warna);
+        // dd($getMu);
+
+        $qtyPo = 0;
+        foreach ($getMu as $mu) {
+            $styleSize = $mu['style_size'];
+            $qtyPcsUrl = 'http://172.23.39.118/CapacityApps/public/api/getQtyPcsByAreaByStyle/' . $area . '?no_model='
+                . $no_model . '&style_size=' . urlencode($styleSize);
+            $qtyPcs = fetchApiData($qtyPcsUrl);
+
+            $kgKebutuhan = $qtyPcs * $mu['gw'] * ($mu['composition'] / 100) * (1 + ($mu['loss'] / 100)) / 1000;
+            // dd($kgKebutuhan);
+            $qtyPo += $kgKebutuhan;
+        }
+        dd($qtyPo);
+
 
         if (!$detailRetur) {
             return redirect()->to(base_url(session()->get('role') . '/retur'));
