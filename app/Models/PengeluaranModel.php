@@ -210,4 +210,51 @@ class PengeluaranModel extends Model
 
         return $builder->get()->getResultArray();
     }
+    public function getTotalPengirimanByAreaPdkKode($area, $no_model, $item_type, $kode_warna)
+    {
+        // Mengambil tabel material
+        $materialTabel = $this->db->table('material');
+        $material = $materialTabel->select('id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+            ->where('master_order.no_model', $no_model)
+            ->where('material.item_type', $item_type)
+            ->where('material.kode_warna', $kode_warna)
+            ->get()
+            ->getResultArray(); // Ambil hasil sebagai array
+
+        // Ambil id_material dari hasil sebelumnya
+        $idMaterialList = array_column($material, 'id_material');
+
+        // Jika tidak ada data id_material, langsung kembalikan null
+        if (empty($idMaterialList)) {
+            return null;
+        }
+
+        // Mengambil tabel pemesanan
+        $pemesananTabel = $this->db->table('pemesanan');
+        $pemesanan = $pemesananTabel->select('pemesanan.id_total_pemesanan')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan = pemesanan.id_total_pemesanan', 'left')
+            ->whereIn('id_material', $idMaterialList)
+            ->where('status_kirim', 'YA')
+            ->get()
+            ->getResultArray(); // Ambil hasil sebagai array
+
+        // Ambil id_total_pemesanan dari hasil sebelumnya
+        $idPemesananList = array_column($pemesanan, 'id_total_pemesanan');
+
+        // Jika tidak ada data id_total_pemesanan, langsung kembalikan null
+        if (empty($idPemesananList)) {
+            return null;
+        }
+
+        // Menghitung total pengiriman
+        $pengiriman = $this->db->table('pengeluaran') // Ganti 'pengeluaran' dengan nama tabel Anda
+            ->select('SUM(kgs_out) as kgs_out, SUM(cns_out) as cns_out, SUM(krg_out) as krg_out, group_concat(distinct lot_out) as lot_out')
+            ->whereIn('id_total_pemesanan', $idPemesananList)
+            ->where('area_out', $area)
+            ->get()
+            ->getRowArray(); // Ambil hasil sebagai array
+
+        return $pengiriman;
+    }
 }

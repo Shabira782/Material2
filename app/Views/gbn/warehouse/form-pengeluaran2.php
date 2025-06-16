@@ -58,7 +58,7 @@
                                         <p><strong>ITEM TYPE:</strong> <?= $pengeluaran[0]['item_type']; ?></p>
                                         <p><strong>WARNA:</strong> <?= $pengeluaran[0]['color']; ?></p>
                                         <p><strong>KODE WARNA:</strong> <?= $pengeluaran[0]['kode_warna']; ?></p>
-                                        <p><strong>SISA JATAH:</strong> - KG</p>
+                                        <p><strong>SISA JATAH:</strong> <?= $sisa_jatah ?> KG</p>
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <p><strong>TTL PESAN (KG):</strong> <?= number_format($pengeluaran[0]['ttl_kg'], 0, ',', '.'); ?> KG</p>

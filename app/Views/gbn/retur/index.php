@@ -99,6 +99,7 @@
                                             <th>Warna</th>
                                             <th>Kgs Retur</th>
                                             <th>Cns Retur</th>
+                                            <th>Lot Retur</th>
                                             <th>Area Retur</th>
                                             <th>Tgl Retur</th>
                                             <th>Aksi</th>
@@ -122,6 +123,7 @@
                                                 </td>
                                                 <td><?= $row['kgs_retur'] ?></td>
                                                 <td><?= $row['cns_retur'] ?></td>
+                                                <td><?= $row['lot_retur'] ?></td>
                                                 <td><?= $row['area_retur'] ?></td>
                                                 <td><?= date('d-m-Y', strtotime($row['tgl_retur'])) ?></td>
                                                 <td>

@@ -728,11 +728,57 @@ class PemesananController extends BaseController
     {
         $pengeluaran = $this->pengeluaranModel->getPengeluaranByPemesanan($idTotalPemesanan);
         // dd($pengeluaran);
+
+        $area       = $pengeluaran[0]['admin'];
+        $no_model   = $pengeluaran[0]['no_model'];
+        $item_type  = $pengeluaran[0]['item_type'];
+        $kode_warna = $pengeluaran[0]['kode_warna'];
+        $warna      = $pengeluaran[0]['color'];
+
+        function fetchApiData($url)
+        {
+            try {
+                $response = file_get_contents($url);
+                if ($response === false) {
+                    throw new \Exception("Error fetching data from $url");
+                }
+                $data = json_decode($response, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Exception("Invalid JSON response from $url");
+                }
+                return $data;
+            } catch (\Exception $e) {
+                error_log($e->getMessage());
+                return null;
+            }
+        }
+
+        // get komposisi, gw dan los
+        $getMu = $this->materialModel->getStyleSizeByBb($no_model, $item_type, $kode_warna);
+        $kgKebutuhan = 0;
+        foreach ($getMu as $mu) {
+            $styleSize = $mu['style_size'];
+            $qtyPcsUrl = 'http://172.23.39.118/CapacityApps/public/api/getQtyPcsByAreaByStyle/' . $area . '?no_model='
+                . $no_model . '&style_size=' . urlencode($styleSize);
+            $qtyPcs = fetchApiData($qtyPcsUrl);
+
+            $kebutuhan = $qtyPcs * $mu['gw'] * ($mu['composition'] / 100) * (1 + ($mu['loss'] / 100)) / 1000;
+            // dd($kgKebutuhan);
+            $kgKebutuhan += $kebutuhan;
+            $kgKebutuhan = round($kgKebutuhan, 2);
+        }
+
+        $pengiriman = $this->pengeluaranModel->getTotalPengirimanByAreaPdkKode($area, $no_model, $item_type, $kode_warna);
+
+        $sisaJatah = $kgKebutuhan - $pengiriman['kgs_out'];
+
+        // dd($pengeluaran);
         $data = [
             'active' => $this->active,
             'title' => 'Material System',
             'role' => $this->role,
-            'pengeluaran' => $pengeluaran
+            'pengeluaran' => $pengeluaran,
+            'sisa_jatah' => $sisaJatah
         ];
         return view($this->role . '/warehouse/form-pengeluaran2', $data);
     }
@@ -752,6 +798,7 @@ class PemesananController extends BaseController
                     'kgs_out'  => $data['kg_kirim'][$key],
                     'cns_out' => $data['cns_kirim'][$key],
                     'krg_out' => $data['krg_kirim'][$key],
+                    'status' => 'Perngiriman Area',
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
                 if (!$this->pengeluaranModel->update($id, $updatePengeluaran)) {

@@ -9,6 +9,7 @@ use App\Models\MasterMaterialModel;
 use App\Models\MaterialModel;
 use App\Models\ReturModel;
 use App\Models\PemasukanModel;
+use App\Models\PengeluaranModel;
 use App\Models\OutCelupModel;
 use App\Models\KategoriReturModel;
 use App\Models\ScheduleCelupModel;
@@ -26,6 +27,7 @@ class ReturController extends BaseController
     protected $materialModel;
     protected $returModel;
     protected $pemasukanModel;
+    protected $pengeluaranModel;
     protected $outCelupModel;
     protected $kategoriReturModel;
     protected $scheduleCelupModel;
@@ -39,6 +41,7 @@ class ReturController extends BaseController
         $this->masterOrderModel = new MasterOrderModel();
         $this->returModel = new ReturModel();
         $this->pemasukanModel = new PemasukanModel();
+        $this->pengeluaranModel = new PengeluaranModel();
         $this->outCelupModel = new OutCelupModel();
         $this->kategoriReturModel = new KategoriReturModel();
         $this->scheduleCelupModel = new ScheduleCelupModel();
@@ -272,9 +275,11 @@ class ReturController extends BaseController
             $kgKebutuhan = $qtyPcs * $mu['gw'] * ($mu['composition'] / 100) * (1 + ($mu['loss'] / 100)) / 1000;
             // dd($kgKebutuhan);
             $qtyPo += $kgKebutuhan;
+            $qtyPo = round($qtyPo, 2);
         }
-        dd($qtyPo);
 
+        $pengiriman = $this->pengeluaranModel->getTotalPengirimanByAreaPdkKode($area, $no_model, $item_type, $kode_warna);
+        // dd($pengiriman);
 
         if (!$detailRetur) {
             return redirect()->to(base_url(session()->get('role') . '/retur'));
@@ -285,7 +290,9 @@ class ReturController extends BaseController
             'active' => $this->active,
             'title' => "Detail Retur",
             'detailRetur' => $detailRetur,
-            'cluster' => $cluster
+            'cluster' => $cluster,
+            'qtyPo' => $qtyPo,
+            'pengiriman' => $pengiriman
         ];
         return view($this->role . '/retur/detail-retur', $data);
     }

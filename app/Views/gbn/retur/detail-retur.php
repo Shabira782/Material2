@@ -72,7 +72,7 @@
                             <div class="row mb-3">
                                 <div class="col-md-2">
                                     <label for="kg_po" class="form-label">Qty PO</label>
-                                    <input type="text" class="form-control" id="kg_po" name="kg_po" value="<?= $detailRetur['kg_po'] ?? 0 ?>" readonly>
+                                    <input type="text" class="form-control" id="kg_po" name="kg_po" value="<?= $qtyPo ?? 0 ?>" readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label for="kg_po_plus" class="form-label">Qty PO (+)</label>
@@ -80,19 +80,19 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label for="qty_kirim" class="form-label">Qty Kirim (KG)</label>
-                                    <input type="text" class="form-control" id="qty_kirim" name="qty_kirim" value="<?= $detailRetur['qty_kirim'] ?? 0 ?>" readonly>
+                                    <input type="text" class="form-control" id="qty_kirim" name="qty_kirim" value="<?= round($pengiriman['kgs_out'], 2) ?? 0 ?>" readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label for="cones_kirim" class="form-label">Cones Kirim</label>
-                                    <input type="text" class="form-control" id="cones_kirim" name="cones_kirim" value="<?= $detailRetur['cones_kirim'] ?? 0 ?>" readonly>
+                                    <input type="text" class="form-control" id="cones_kirim" name="cones_kirim" value="<?= $pengiriman['cns_out'] ?? 0 ?>" readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label for="karung_kirim" class="form-label">Karung Kirim</label>
-                                    <input type="text" class="form-control" id="karung_kirim" name="karung_kirim" value="<?= $detailRetur['karung_kirim'] ?? 0 ?>" readonly>
+                                    <input type="text" class="form-control" id="karung_kirim" name="karung_kirim" value="<?= $pengiriman['krg_out'] ?? 0 ?>" readonly>
                                 </div>
                                 <div class="col-md-2">
                                     <label for="lot_kirim" class="form-label">Lot Kirim</label>
-                                    <input type="text" class="form-control" id="lot_kirim" name="lot_kirim" value="<?= $detailRetur['lot_kirim'] ?? '' ?>" readonly>
+                                    <input type="text" class="form-control" id="lot_kirim" name="lot_kirim" value="<?= $pengiriman['lot_out'] ?? '' ?>" readonly>
                                 </div>
                             </div>
 
