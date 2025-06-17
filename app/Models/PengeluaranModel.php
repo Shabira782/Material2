@@ -186,7 +186,8 @@ class PengeluaranModel extends Model
             material.kode_warna, 
             material.color, 
             stock.nama_cluster,
-            stock.nama_cluster, (stock.kgs_stock_awal + stock.kgs_in_out) as kg_stock, 
+            stock.nama_cluster, 
+            (stock.kgs_stock_awal + stock.kgs_in_out) as kg_stock, 
             (stock.cns_stock_awal + stock.cns_in_out) as cns_stock,
             (stock.krg_stock_awal + stock.krg_in_out) as krg_stock,
             GROUP_CONCAT(DISTINCT stock.lot_awal, stock.lot_stock) AS lot_stock,
@@ -205,7 +206,7 @@ class PengeluaranModel extends Model
 
         $builder->where('total_pemesanan.id_total_pemesanan', $idTotalPemesanan);
         $builder->where('pemesanan.status_kirim', 'YA');
-        $builder->groupBy('stock.id_stock, , total_pemesanan.id_total_pemesanan');
+        $builder->groupBy('stock.id_stock, total_pemesanan.id_total_pemesanan');
         $builder->orderBy('pengeluaran.nama_cluster', 'ASC');
 
         return $builder->get()->getResultArray();

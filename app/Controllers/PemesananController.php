@@ -729,11 +729,11 @@ class PemesananController extends BaseController
         $pengeluaran = $this->pengeluaranModel->getPengeluaranByPemesanan($idTotalPemesanan);
         // dd($pengeluaran);
 
-        $area       = $pengeluaran[0]['admin'];
-        $no_model   = $pengeluaran[0]['no_model'];
-        $item_type  = $pengeluaran[0]['item_type'];
-        $kode_warna = $pengeluaran[0]['kode_warna'];
-        $warna      = $pengeluaran[0]['color'];
+        $area       = $pengeluaran[0]['admin'] ?? '';
+        $no_model   = $pengeluaran[0]['no_model'] ?? '';
+        $item_type  = $pengeluaran[0]['item_type'] ?? '';
+        $kode_warna = $pengeluaran[0]['kode_warna'] ?? '';
+        $warna      = $pengeluaran[0]['color'] ?? '';
 
         function fetchApiData($url)
         {
@@ -770,7 +770,7 @@ class PemesananController extends BaseController
 
         $pengiriman = $this->pengeluaranModel->getTotalPengirimanByAreaPdkKode($area, $no_model, $item_type, $kode_warna);
 
-        $sisaJatah = $kgKebutuhan - $pengiriman['kgs_out'];
+        $sisaJatah = $kgKebutuhan - ($pengiriman['kgs_out'] ?? 0);
 
         // dd($pengeluaran);
         $data = [

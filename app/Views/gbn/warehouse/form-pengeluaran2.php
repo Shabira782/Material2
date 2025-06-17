@@ -115,13 +115,22 @@
                                         value="<?= $data['nama_cluster'] ?>"
                                         readonly>
                                 </div>
+                                <div class="col-md-2">
+                                    <label>Lot</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        name="lot[]"
+                                        value="<?= $data['lot_stock'] ?>"
+                                        required>
+                                </div>
                                 <div class="col-md-1">
                                     <label>KG Stok</label>
                                     <input
                                         type="number"
                                         class="form-control kgs-stock"
                                         name="kgs_stok[]"
-                                        value="<?= $data['kg_stock'] + $data['kgs_out'] ?>"
+                                        value="<?= number_format($data['kg_stock'] + $data['kgs_out'], 2) ?>"
                                         readonly>
                                 </div>
                                 <div class="col-md-2">
@@ -167,15 +176,6 @@
                                         class="form-control krg-kirim"
                                         name="krg_kirim[]"
                                         value="<?= $data['krg_out'] ?>"
-                                        required>
-                                </div>
-                                <div class="col-md-2">
-                                    <label>Lot</label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        name="lot[]"
-                                        value="<?= $data['lot_stock'] ?>"
                                         required>
                                 </div>
                             </div>
