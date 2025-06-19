@@ -748,7 +748,8 @@ class ApiController extends ResourceController
             'kode_warna' => $kode_warna,
         ];
 
-        $totalPengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
+        // $totalPengiriman = $this->pengeluaranModel->getTotalPengiriman($data);
+        $totalPengiriman = $this->pengeluaranModel->getTotalPengirimanByAreaPdkKode($area, $no_model, $item_type, $kode_warna);
 
         return $this->respond($totalPengiriman, 200);
     }

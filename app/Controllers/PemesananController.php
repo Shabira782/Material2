@@ -143,8 +143,21 @@ class PemesananController extends BaseController
                 ->first();
             $item['sudah_pesan_spandex'] = $cekSpandex ? true : false;
             $item['status'] = $cekSpandex ? $cekSpandex['status'] : 'BELUM PESAN';
+
+            // Ambil data pengeluaran berdasarkan parameter
+            $pengeluaran = $this->pengeluaranModel->getTotalPengirimanByAreaPdkKode(
+                $area,
+                $item['no_model'],       // Pastikan 'no_model' ada di $item
+                $item['item_type'],      // Pastikan 'item_type' ada di $item
+                $item['kode_warna']      // Pastikan 'kode_warna' ada di $item
+            );
+
+            // Tambahkan hasil ke item
+            $item['kgs_out'] = $pengeluaran['kgs_out'] ?? 0; // Contoh data, sesuaikan dengan hasil fungsi
+            $item['krg_out'] = $pengeluaran['krg_out'] ?? 0; // Contoh data
+            // $item['detail_pengiriman'] = $pengeluaran; // Simpan semua data jika diperlukan
         }
-        // dd ($dataPemesanan);
+        // dd($dataPemesanan);
         $listPemesanan = $this->pemesananSpandexKaretModel->getListPemesananSpandexKaret($area, $jenis, $tglPakai);
 
         $data = [
@@ -798,7 +811,7 @@ class PemesananController extends BaseController
                     'kgs_out'  => $data['kg_kirim'][$key],
                     'cns_out' => $data['cns_kirim'][$key],
                     'krg_out' => $data['krg_kirim'][$key],
-                    'status' => 'Perngiriman Area',
+                    'status' => 'Pengiriman Area',
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
                 if (!$this->pengeluaranModel->update($id, $updatePengeluaran)) {

@@ -63,6 +63,7 @@
                                     <div class="col-md-4 mb-2">
                                         <p><strong>TTL PESAN (KG):</strong> <?= number_format($pengeluaran[0]['ttl_kg'], 0, ',', '.'); ?> KG</p>
                                         <p><strong>CONES PESAN:</strong> <?= $pengeluaran[0]['ttl_cns']; ?> CONES</p>
+                                        <p><strong>LOT PESAN:</strong> <?= $pengeluaran[0]['lot']; ?></p>
                                         <p><strong>KETERANGAN:</strong> <?= $pengeluaran[0]['keterangan'] ?? "-"; ?></p>
                                     </div>
                                 </div>

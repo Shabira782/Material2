@@ -81,7 +81,7 @@
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kg/Krg Kirim</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Kirim</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster Out</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cluster</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Send</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,13 +103,11 @@
                                         <td><?= $data['lot_pesan'] ?></td>
                                         <td><?= $data['ket_pesan'] ?></td>
                                         <td><?= $data['po_tambahan'] ?></td>
-                                        <td><?= !empty($data['kg_kirim']) ? number_format($data['kg_kirim'], 2) . ' / ' . $data['krg_kirim'] : '' ?></td>
+                                        <td><?= !empty($data['kgs_out']) ? number_format($data['kgs_out'], 2) . ' / ' . $data['krg_out'] : '' ?></td>
                                         <td><?= $data['lot_kirim'] ?></td>
                                         <td><?= $data['cluster_kirim'] ?></td>
                                         <td>
-
                                             <!-- button pesan ke covering -->
-
                                             <?php if ($data['jenis'] === 'SPANDEX' || $data['jenis'] === 'KARET'): ?>
                                                 <?php if (!$data['sudah_pesan_spandex']): ?>
                                                     <a href="<?= base_url($role . '/pesanKeCovering/' . $data['id_total_pemesanan']) ?>"
@@ -119,12 +117,17 @@
                                                 <?php else: ?>
                                                     <span class="badge bg-info"><?= $data['status'] ?></span>
                                                 <?php endif; ?>
-                                            <?php else: ?>
-                                                <a href="<?= base_url($role . '/pengirimanArea/' . $data['id_total_pemesanan']) ?>"
-                                                    class="btn bg-gradient-success">
-                                                    <i class="fas fa-paper-plane"></i>Send
-                                                </a>
-                                            <?php endif; ?>
+                                                <?php else:
+                                                if (!empty($data['id_pengeluaran'])) {
+
+                                                ?>
+                                                    <a href="<?= base_url($role . '/pengirimanArea/' . $data['id_total_pemesanan']) ?>"
+                                                        class="btn bg-gradient-success">
+                                                        <i class="fas fa-paper-plane"></i>Send
+                                                    </a>
+                                            <?php
+                                                }
+                                            endif; ?>
 
                                         </td>
                                     </tr>
